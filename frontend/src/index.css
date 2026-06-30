@@ -1,0 +1,216 @@
+/* ── Responsive utility classes ─────────────────────────────── */
+
+/* Auth pages: Login / Register two-column layout */
+.auth-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+.auth-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-width: 0;
+}
+.auth-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-width: 0;
+}
+
+/* Landing hero row */
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.hero-illustration {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Schedule: content + sidebar */
+.schedule-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Profile: sidebar + content */
+.profile-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+.profile-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+
+/* Navbar center links */
+.nav-center-links {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+/* Hero action buttons */
+.hero-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Admin dashboard grid */
+.admin-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+
+/* ── Tablet (≤ 900px) ────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .schedule-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .profile-layout {
+    flex-direction: column !important;
+  }
+  .profile-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  .hero-row {
+    flex-direction: column !important;
+    text-align: center;
+  }
+  .hero-illustration {
+    display: none !important;
+  }
+  .hero-buttons {
+    justify-content: center;
+  }
+}
+
+/* ── Small tablet / large phone (≤ 768px) ───────────────────── */
+@media (max-width: 768px) {
+  .auth-layout {
+    flex-direction: column !important;
+  }
+  .auth-left {
+    display: none !important;
+  }
+  .auth-right {
+    padding: 2.5rem 1.5rem !important;
+    align-items: flex-start !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .admin-nav-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ── Phone (≤ 540px) ─────────────────────────────────────────── */
+@media (max-width: 540px) {
+  .nav-center-links {
+    display: none !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-nav-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-right {
+    padding: 2rem 1rem !important;
+  }
+
+  .hero-buttons {
+    flex-direction: column !important;
+    align-items: stretch;
+  }
+
+  .profile-layout {
+    padding: 0 !important;
+  }
+
+  /* Make tables horizontally scrollable on phone */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Landing page grid layout */
+.landing-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  align-items: start;
+}
+.landing-live-status { grid-column: 1; grid-row: 1; }
+.landing-routes      { grid-column: 2; grid-row: 1; }
+.landing-nearby      { grid-column: 1; grid-row: 2; }
+.landing-map         { grid-column: 2; grid-row: 2; }
+
+@media (max-width: 700px) {
+  .landing-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .landing-routes      { grid-column: 1 / -1; grid-row: 1; }
+  .landing-live-status { grid-column: 1;      grid-row: 2; }
+  .landing-nearby      { grid-column: 2;      grid-row: 2; }
+  .landing-map         { grid-column: 1 / -1; grid-row: 3; }
+}
+
+@media (max-width: 420px) {
+  .landing-grid { grid-template-columns: 1fr; }
+  .landing-live-status { grid-column: 1; grid-row: 2; }
+  .landing-nearby      { grid-column: 1; grid-row: 3; }
+  .landing-map         { grid-column: 1; grid-row: 4; }
+}
+
+/* ── Global helpers ──────────────────────────────────────────── */
+img { max-width: 100%; }
+
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+@media (max-width: 540px) {
+  .page-container {
+    padding: 1.25rem 1rem;
+  }
+}

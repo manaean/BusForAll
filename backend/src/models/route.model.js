@@ -1,49 +1,16 @@
-const pool = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const RouteModel = {
+const Route = sequelize.define('Route', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING(100), allowNull: false },
+  description: { type: DataTypes.TEXT }
+}, {
+  tableName: 'routes',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false,
+  indexes: [{ fields: ['name'] }]
+});
 
-  // Get all routes
-  getAll: async () => {
-    const [rows] = await pool.query('SELECT * FROM routes');
-    return rows;
-  },
-
-  // Get one route by id
-  getById: async (id) => {
-    const [rows] = await pool.query(
-      'SELECT * FROM routes WHERE id = ?',
-      [id]
-    );
-    return rows[0];
-  },
-
-  // Create a route
-  create: async (name, description) => {
-    const [result] = await pool.query(
-      'INSERT INTO routes (name, description) VALUES (?, ?)',
-      [name, description]
-    );
-    return result.insertId;
-  },
-
-  // Update a route
-  update: async (id, name, description) => {
-    const [result] = await pool.query(
-      'UPDATE routes SET name = ?, description = ? WHERE id = ?',
-      [name, description, id]
-    );
-    return result.affectedRows;
-  },
-
-  // Delete a route
-  delete: async (id) => {
-    const [result] = await pool.query(
-      'DELETE FROM routes WHERE id = ?',
-      [id]
-    );
-    return result.affectedRows;
-  }
-
-};
-
-module.exports = RouteModel;
+module.exports = Route;

@@ -1,34 +1,62 @@
-const RouteModel = require('../models/route.model');
+const { Route, Stop, RouteStop, Schedule, Delay } = require('../models');
 
 const RouteService = {
+  getAll: () => Route.findAll({
+    include: [{ model: Stop, as: 'Stops', through: { attributes: ['stopOrder'] } }],
+    order: [['name', 'ASC']]
+  }),
 
-  getAllRoutes: async () => {
-    return await RouteModel.getAll();
-  },
-
-  getRouteById: async (id) => {
-    const route = await RouteModel.getById(id);
-    if (!route) throw new Error('Route not found');
+  getById: async (id) => {
+    const route = await Route.findByPk(id, {
+      include: [
+        { model: Stop, as: 'Stops', through: { attributes: ['stopOrder', 'id'] } },
+        { model: Schedule, as: 'Schedules', order: [['departureTime', 'ASC']] },
+        { model: Delay, as: 'Delays', where: { isActive: true }, required: false }
+      ]
+    });
+    if (!route) throw Object.assign(new Error('Route not found'), { status: 404 });
     return route;
   },
 
-  createRoute: async (name, description) => {
-    const id = await RouteModel.create(name, description);
-    return { id, name, description };
+  getStops: async (routeId) => {
+    const route = await Route.findByPk(routeId, {
+      include: [{ model: Stop, as: 'Stops', through: { attributes: ['stopOrder'] } }]
+    });
+    if (!route) throw Object.assign(new Error('Route not found'), { status: 404 });
+    return route.Stops || [];
   },
 
-  updateRoute: async (id, name, description) => {
-    const affected = await RouteModel.update(id, name, description);
-    if (!affected) throw new Error('Route not found');
-    return { id, name, description };
+  create: async ({ name, description }) => {
+    if (!name) throw Object.assign(new Error('Route name is required'), { status: 400 });
+    return Route.create({ name, description });
   },
 
-  deleteRoute: async (id) => {
-    const affected = await RouteModel.delete(id);
-    if (!affected) throw new Error('Route not found');
+  update: async (id, { name, description }) => {
+    const route = await Route.findByPk(id);
+    if (!route) throw Object.assign(new Error('Route not found'), { status: 404 });
+    await route.update({ name, description });
+    return route;
+  },
+
+  delete: async (id) => {
+    const route = await Route.findByPk(id);
+    if (!route) throw Object.assign(new Error('Route not found'), { status: 404 });
+    await route.destroy();
     return { message: 'Route deleted successfully' };
-  }
+  },
 
+  addStop: async (routeId, stopId, stopOrder) => {
+    if (!routeId || !stopId || stopOrder === undefined) {
+      throw Object.assign(new Error('routeId, stopId, and stopOrder are required'), { status: 400 });
+    }
+    return RouteStop.create({ routeId, stopId, stopOrder });
+  },
+
+  removeStop: async (routeId, stopId) => {
+    const deleted = await RouteStop.destroy({ where: { routeId, stopId } });
+    if (!deleted) throw Object.assign(new Error('Stop not found on this route'), { status: 404 });
+    return { message: 'Stop removed from route' };
+  }
 };
 
 module.exports = RouteService;
