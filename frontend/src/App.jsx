@@ -13,6 +13,7 @@ import Landing from './pages/Landing';
 import Home from './pages/commuter/Home';
 import Routes_ from './pages/commuter/Routes';
 import Schedule from './pages/commuter/Schedule';
+import TripDetail from './pages/commuter/TripDetail';
 import Tracker from './pages/commuter/Tracker';
 import Favourites from './pages/commuter/Favourites';
 import Alerts from './pages/commuter/Alerts';
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/home" element={<ProtectedRoute roles={['commuter', 'admin']}><Home /></ProtectedRoute>} />
           <Route path="/routes" element={<Routes_ />} />
           <Route path="/schedule/:routeId" element={<Schedule />} />
+          <Route path="/trip/:routeId" element={<TripDetail />} />
           <Route path="/tracker/:routeId" element={<Tracker />} />
           <Route path="/favourites" element={<ProtectedRoute roles={['commuter', 'admin']}><Favourites /></ProtectedRoute>} />
           <Route path="/alerts" element={<Alerts />} />

@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { getAllRoutes } from '../api/route.api';
 import { getAlerts } from '../api/alert.api';
 import { getAllDelays } from '../api/driver.api';
+import NearbyStops from '../components/NearbyStops';
 
 export default function Landing() {
   const [query, setQuery] = useState('');
@@ -15,7 +16,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllRoutes().then(r => setRoutes(r.data.slice(0, 4))).catch(() => {});
+    getAllRoutes().then(r => setRoutes(r.data)).catch(() => {});
     getAlerts(true).then(r => setAlerts(r.data.slice(0, 3))).catch(() => {});
     getAllDelays().then(r => setDelays(r.data.filter(d => d.isActive))).catch(() => {});
   }, []);
@@ -107,7 +108,7 @@ export default function Landing() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             {routes.length === 0 ? (
               <p style={{ color: '#9ca3af', fontSize: '.875rem', gridColumn: 'span 2' }}>No routes available.</p>
-            ) : routes.map(r => (
+            ) : routes.slice(0, 4).map(r => (
               <Link key={r.id} to={`/schedule/${r.id}`} style={{ textDecoration: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.9rem 1rem', display: 'block' }}>
                 <div style={{ marginBottom: '0.4rem' }}>
                   <span style={{ background: '#1a5a7a', color: '#fff', fontSize: '.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>Route {r.id}</span>
@@ -124,11 +125,8 @@ export default function Landing() {
 
         {/* Nearby Stops */}
         <div className="landing-nearby" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
-          <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', marginBottom: '1rem' }}>Nearby Stops</h2>
-          <p style={{ color: '#9ca3af', fontSize: '.875rem', marginBottom: '1rem' }}>Browse all stops across Phnom Penh bus routes.</p>
-          <Link to="/routes" style={{ display: 'inline-block', padding: '0.7rem 1.5rem', background: '#fff', border: '1.5px solid #1a5a7a', color: '#1a5a7a', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '.875rem' }}>
-            View All Stops
-          </Link>
+          <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', marginBottom: '0.75rem' }}>Nearby Stops</h2>
+          <NearbyStops routes={routes} maxStops={4} />
         </div>
 
         {/* Map */}

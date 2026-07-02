@@ -15,7 +15,7 @@ function FitBounds({ positions }) {
   return null;
 }
 
-export default function TripCard({ route, destStop, boardingStop, boardingDist, userPos, allStops, onRequestLocation }) {
+export default function TripCard({ route, destStop, boardingStop, boardingDist, userPos, allStops, onRequestLocation, locationLoading = false, locationError = null }) {
   const [stopIdx, setStopIdx] = useState(0);
   const [t, setT] = useState(0);
 
@@ -164,12 +164,17 @@ export default function TripCard({ route, destStop, boardingStop, boardingDist, 
           </div>
         </div>
       ) : (
-        <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '.85rem', color: '#6b7280' }}>Share your location to see ETA and your nearest boarding stop</span>
-          <button onClick={onRequestLocation}
-            style={{ padding: '6px 16px', background: '#1a5a7a', color: '#fff', border: 'none', borderRadius: 8, fontSize: '.82rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-            Use My Location
-          </button>
+        <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '.85rem', color: '#6b7280' }}>Share your location to see ETA and your nearest boarding stop</span>
+            <button onClick={onRequestLocation} disabled={locationLoading}
+              style={{ padding: '6px 16px', background: locationLoading ? '#9ca3af' : '#1a5a7a', color: '#fff', border: 'none', borderRadius: 8, fontSize: '.82rem', fontWeight: 600, cursor: locationLoading ? 'default' : 'pointer', flexShrink: 0 }}>
+              {locationLoading ? 'Locating…' : 'Use My Location'}
+            </button>
+          </div>
+          {locationError && (
+            <div style={{ fontSize: '.78rem', color: '#dc2626', marginTop: '0.5rem' }}>{locationError}</div>
+          )}
         </div>
       )}
     </div>
