@@ -6,7 +6,7 @@
 //   4. Pathfinding    → if not, search the stop/route graph for a path with transfers
 //   5. Ranking        → sort candidate itineraries by total time (walk + ride + transfers)
 
-export const RIDE_MIN_PER_STOP = 3;
+export const AVG_BUS_SPEED_KMH = 60;
 export const TRANSFER_PENALTY_MIN = 5;
 const WALK_SPEED_M_PER_MIN = 80; // ~4.8 km/h
 
@@ -17,6 +17,27 @@ export function haversine(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat / 2) ** 2 +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Minutes to cover a real-world distance at the assumed average bus speed —
+// the single source of truth for ride-time math (pathfinding weights, ETA
+// displays, and the live-tracking simulation all derive from this).
+export function rideMinutesForDistance(meters) {
+  return (meters / 1000) / AVG_BUS_SPEED_KMH * 60;
+}
+
+// Total route length in meters — sums haversine distance between each
+// consecutive pair of (already sorted, geocoded) stops.
+export function routeDistanceMeters(stops) {
+  const pts = stops.filter(s => s.latitude && s.longitude);
+  let total = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    total += haversine(
+      parseFloat(pts[i].latitude), parseFloat(pts[i].longitude),
+      parseFloat(pts[i + 1].latitude), parseFloat(pts[i + 1].longitude)
+    );
+  }
+  return total;
 }
 
 function sortedStops(r) {
@@ -36,8 +57,12 @@ function buildGraph(routes) {
     stops.forEach(s => stopsById.set(s.id, s));
     for (let i = 0; i < stops.length - 1; i++) {
       const from = stops[i].id;
+      const distM = haversine(
+        parseFloat(stops[i].latitude), parseFloat(stops[i].longitude),
+        parseFloat(stops[i + 1].latitude), parseFloat(stops[i + 1].longitude)
+      );
       if (!edgesFrom.has(from)) edgesFrom.set(from, []);
-      edgesFrom.get(from).push({ to: stops[i + 1].id, routeId: r.id, routeName: r.name, weight: RIDE_MIN_PER_STOP });
+      edgesFrom.get(from).push({ to: stops[i + 1].id, routeId: r.id, routeName: r.name, weight: rideMinutesForDistance(distM) });
     }
   });
 
@@ -139,7 +164,7 @@ export function planTrips({ routes, userLocation, destinationQuery, maxResults =
 
     const legs = edgesToLegs(result.edges, stopsById);
     const walkMin = dist / WALK_SPEED_M_PER_MIN;
-    const rideMin = legs.reduce((sum, l) => sum + (l.stops.length - 1) * RIDE_MIN_PER_STOP, 0);
+    const rideMin = legs.reduce((sum, l) => sum + rideMinutesForDistance(routeDistanceMeters(l.stops)), 0);
     const transferMin = (legs.length - 1) * TRANSFER_PENALTY_MIN;
 
     itineraries.push({

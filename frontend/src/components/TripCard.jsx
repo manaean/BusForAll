@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
+import { TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-const STEP_MS = 8000;
-const TICK_MS = 100;
-const MINS_PER_STOP = 3;
+import { useEffect } from 'react';
+import ExpandableMap from './ExpandableMap';
+import useSimulatedBus, { etaMinutes } from '../hooks/useSimulatedBus';
+import { routeDistanceMeters, rideMinutesForDistance } from '../utils/tripPlanner';
 
 function FitBounds({ positions }) {
   const map = useMap();
@@ -16,19 +15,8 @@ function FitBounds({ positions }) {
 }
 
 export default function TripCard({ route, destStop, boardingStop, boardingDist, userPos, allStops, onRequestLocation, locationLoading = false, locationError = null }) {
-  const [stopIdx, setStopIdx] = useState(0);
-  const [t, setT] = useState(0);
-
-  useEffect(() => {
-    if (allStops.length < 2) return;
-    const interval = setInterval(() => {
-      setT(prev => {
-        if (prev >= 1) { setStopIdx(i => (i + 1) % allStops.length); return 0; }
-        return Math.min(prev + TICK_MS / STEP_MS, 1);
-      });
-    }, TICK_MS);
-    return () => clearInterval(interval);
-  }, [allStops.length]);
+  const bus = useSimulatedBus(allStops);
+  const { stopIdx, t } = bus;
 
   const destIdx = allStops.findIndex(s => s.id === destStop.id);
   const boardingIdx = boardingStop ? allStops.findIndex(s => s.id === boardingStop.id) : null;
@@ -36,11 +24,8 @@ export default function TripCard({ route, destStop, boardingStop, boardingDist, 
   // ETA calculation (only when boarding stop known)
   let etaToBoarding = null, etaToDest = null;
   if (boardingIdx !== null) {
-    const stopsToBoarding = boardingIdx >= stopIdx
-      ? boardingIdx - stopIdx
-      : (allStops.length - stopIdx) + boardingIdx;
-    etaToBoarding = Math.max(1, Math.round((stopsToBoarding - t) * MINS_PER_STOP));
-    etaToDest = etaToBoarding + (destIdx - boardingIdx) * MINS_PER_STOP;
+    etaToBoarding = etaMinutes(allStops, stopIdx, t, boardingIdx);
+    etaToDest = etaToBoarding + Math.round(rideMinutesForDistance(routeDistanceMeters(allStops.slice(boardingIdx, destIdx + 1))));
   }
 
   const cur = allStops[stopIdx];
@@ -105,12 +90,14 @@ export default function TripCard({ route, destStop, boardingStop, boardingDist, 
       </div>
 
       {/* Map */}
-      <MapContainer
-        style={{ height: 240, width: '100%' }}
-        center={[parseFloat(destStop.latitude), parseFloat(destStop.longitude)]}
-        zoom={13}
-        scrollWheelZoom={false}
-        zoomControl={true}>
+      <ExpandableMap
+        height={240}
+        mapProps={{
+          center: [parseFloat(destStop.latitude), parseFloat(destStop.longitude)],
+          zoom: 13,
+          scrollWheelZoom: false,
+          zoomControl: true,
+        }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -147,7 +134,7 @@ export default function TripCard({ route, destStop, boardingStop, boardingDist, 
             <Popup>You are here</Popup>
           </Marker>
         )}
-      </MapContainer>
+      </ExpandableMap>
 
       {/* ETA / location prompt */}
       {etaToBoarding !== null ? (

@@ -10,7 +10,8 @@ const User = sequelize.define('User', {
     type: DataTypes.ENUM('commuter', 'admin', 'driver'),
     allowNull: false,
     defaultValue: 'commuter'
-  }
+  },
+  isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
 }, {
   tableName: 'users',
   timestamps: true,

@@ -1,13 +1,14 @@
 import { useEffect, useState, useMemo, Fragment } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
+import { TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getSchedulesByRoute } from '../../api/schedule.api';
 import { getAllDelays } from '../../api/driver.api';
 import TripItinerary from '../../components/TripItinerary';
+import ExpandableMap from '../../components/ExpandableMap';
 import useSimulatedBus, { etaMinutes } from '../../hooks/useSimulatedBus';
-import { RIDE_MIN_PER_STOP, haversine } from '../../utils/tripPlanner';
+import { haversine, routeDistanceMeters, rideMinutesForDistance } from '../../utils/tripPlanner';
 
 const LEG_COLORS = ['#1a5a7a', '#2E7D32', '#AD1457', '#E65100'];
 
@@ -23,8 +24,10 @@ function computeStopTimes(stops, departureTime) {
   if (!departureTime || !stops.length) return [];
   const [h, m] = departureTime.split(':').map(Number);
   const base = h * 60 + m;
+  let cumMin = 0;
   return stops.map((s, i) => {
-    const total = base + i * RIDE_MIN_PER_STOP;
+    if (i > 0) cumMin += rideMinutesForDistance(routeDistanceMeters([stops[i - 1], s]));
+    const total = Math.round(base + cumMin);
     const hh = Math.floor(total / 60) % 24;
     const mm = total % 60;
     return { stop: s, time: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` };
@@ -135,10 +138,10 @@ export default function TripDetail() {
 
   const boardIdx = boardStop ? primaryStops.findIndex(s => s.id === boardStop.id) : null;
   const destIdx = primaryStops.findIndex(s => s.id === destStop?.id);
-  const busEta = boardIdx !== null ? etaMinutes(bus.stopIdx, bus.t, boardIdx, primaryStops.length, RIDE_MIN_PER_STOP) : null;
+  const busEta = boardIdx !== null ? etaMinutes(primaryStops, bus.stopIdx, bus.t, boardIdx) : null;
   const displayEta = busEta !== null ? busEta + delayMinutes : null;
   const rideStops = boardIdx !== null && destIdx > boardIdx ? destIdx - boardIdx : null;
-  const rideMin = rideStops !== null ? rideStops * RIDE_MIN_PER_STOP : null;
+  const rideMin = rideStops !== null ? Math.round(rideMinutesForDistance(routeDistanceMeters(primaryStops.slice(boardIdx, destIdx + 1)))) : null;
   const walkDist = userLocation && boardStop
     ? haversine(userLocation.lat, userLocation.lng, parseFloat(boardStop.latitude), parseFloat(boardStop.longitude))
     : option.walkDist;
@@ -211,10 +214,13 @@ export default function TripDetail() {
             <TripItinerary itinerary={option.raw} destStop={destStop} userPos={userLocation} />
           </div>
         ) : card(
-          <MapContainer
-            style={{ height: 300, width: '100%' }}
-            center={destStop ? [parseFloat(destStop.latitude), parseFloat(destStop.longitude)] : [11.5564, 104.9282]}
-            zoom={13} scrollWheelZoom={false}>
+          <ExpandableMap
+            height={300}
+            mapProps={{
+              center: destStop ? [parseFloat(destStop.latitude), parseFloat(destStop.longitude)] : [11.5564, 104.9282],
+              zoom: 13,
+              scrollWheelZoom: false,
+            }}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -244,7 +250,7 @@ export default function TripDetail() {
                 <Popup>You are here</Popup>
               </Marker>
             )}
-          </MapContainer>,
+          </ExpandableMap>,
           { overflow: 'hidden' }
         )}
 

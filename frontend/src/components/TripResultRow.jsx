@@ -1,5 +1,5 @@
 import useSimulatedBus, { etaMinutes } from '../hooks/useSimulatedBus';
-import { RIDE_MIN_PER_STOP, TRANSFER_PENALTY_MIN } from '../utils/tripPlanner';
+import { TRANSFER_PENALTY_MIN, routeDistanceMeters, rideMinutesForDistance } from '../utils/tripPlanner';
 
 const LEG_COLORS = ['#1a5a7a', '#2E7D32', '#AD1457', '#E65100'];
 
@@ -13,17 +13,24 @@ function legStopCount(leg) {
   return Math.max(0, alightIdx - boardIdx);
 }
 
+function legRideMinutes(leg) {
+  const boardIdx = leg.boardStop ? leg.fullStops.findIndex(s => s.id === leg.boardStop.id) : 0;
+  const alightIdx = leg.fullStops.findIndex(s => s.id === leg.alightStop.id);
+  const ridden = leg.fullStops.slice(Math.max(0, boardIdx), alightIdx + 1);
+  return rideMinutesForDistance(routeDistanceMeters(ridden));
+}
+
 export default function TripResultRow({ option, delayMinutes = 0, onSelect }) {
   const firstLeg = option.legs[0];
   const bus = useSimulatedBus(firstLeg.fullStops);
 
   const boardIdx = firstLeg.boardStop ? firstLeg.fullStops.findIndex(s => s.id === firstLeg.boardStop.id) : null;
-  const busEta = boardIdx !== null ? etaMinutes(bus.stopIdx, bus.t, boardIdx, firstLeg.fullStops.length, RIDE_MIN_PER_STOP) : null;
+  const busEta = boardIdx !== null ? etaMinutes(firstLeg.fullStops, bus.stopIdx, bus.t, boardIdx) : null;
   const displayEta = busEta !== null ? busEta + delayMinutes : null;
 
   const transfers = option.legs.length - 1;
   const totalStops = option.legs.reduce((sum, l) => sum + legStopCount(l), 0);
-  const rideMin = totalStops * RIDE_MIN_PER_STOP + transfers * TRANSFER_PENALTY_MIN;
+  const rideMin = option.legs.reduce((sum, l) => sum + legRideMinutes(l), 0) + transfers * TRANSFER_PENALTY_MIN;
 
   const now = Date.now();
   const leaveByDate = displayEta !== null && option.walkMin !== null

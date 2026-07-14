@@ -1,8 +1,9 @@
 const { Assignment, Driver, Bus, Route, User } = require('../models');
 
 const AssignmentService = {
-  getAll: () =>
+  getAll: (driverId) =>
     Assignment.findAll({
+      where: driverId ? { driverId } : {},
       include: [
         { model: Driver, as: 'Driver', include: [{ model: User, as: 'User', attributes: ['id', 'name', 'email'] }] },
         { model: Bus, as: 'Bus' },

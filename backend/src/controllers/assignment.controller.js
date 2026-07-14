@@ -2,7 +2,7 @@ const AssignmentService = require('../services/assignment.service');
 
 const AssignmentController = {
   getAll: async (req, res, next) => {
-    try { res.json(await AssignmentService.getAll()); } catch (err) { next(err); }
+    try { res.json(await AssignmentService.getAll(req.query.driverId)); } catch (err) { next(err); }
   },
 
   getById: async (req, res, next) => {

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getRouteById } from '../../api/route.api';
 import { getSchedulesByRoute } from '../../api/schedule.api';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
+import { routeDistanceMeters } from '../../utils/tripPlanner';
 
 const COLORS = ['#1565C0', '#2E7D32', '#E65100', '#6A1B9A', '#00838F', '#AD1457'];
 
@@ -32,6 +33,11 @@ export default function Schedule() {
   const hasDelay = route?.Delays?.length > 0;
   const delay = hasDelay ? route.Delays[0] : null;
   const stops = route?.Stops || [];
+
+  const distanceKm = useMemo(() => {
+    const sorted = [...stops].sort((a, b) => (a.RouteStop?.stopOrder ?? 0) - (b.RouteStop?.stopOrder ?? 0));
+    return sorted.filter(s => s.latitude && s.longitude).length > 1 ? routeDistanceMeters(sorted) / 1000 : null;
+  }, [stops]);
 
   if (loading) return (
     <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
@@ -113,6 +119,7 @@ export default function Schedule() {
               <h2 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1rem', color: '#111827' }}>Route Information</h2>
               {[
                 { label: 'Total Stops', value: stops.length },
+                ...(distanceKm !== null ? [{ label: 'Distance', value: `${distanceKm.toFixed(1)} km` }] : []),
                 { label: 'Frequency', value: 'Every 20 min' },
                 { label: 'Status', value: hasDelay ? 'Delayed' : 'On Time', color: hasDelay ? '#dc2626' : '#16a34a' },
               ].map(info => (

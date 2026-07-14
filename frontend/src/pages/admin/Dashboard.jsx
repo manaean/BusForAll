@@ -21,14 +21,20 @@ export default function Dashboard() {
   useEffect(() => {
     Promise.allSettled([
       api.get('/api/routes'),
+      api.get('/api/stops'),
       api.get('/api/buses'),
+      api.get('/api/drivers'),
       api.get('/api/users'),
       api.get('/api/alerts?active=true'),
       api.get('/api/delays?active=true'),
-    ]).then(([routes, buses, users, alerts, delays]) => {
+    ]).then(([routes, stops, buses, drivers, users, alerts, delays]) => {
+      const busList = buses.status === 'fulfilled' ? buses.value.data : [];
       setStats({
         routes: routes.status === 'fulfilled' ? routes.value.data.length : 0,
-        buses: buses.status === 'fulfilled' ? buses.value.data.length : 0,
+        stops: stops.status === 'fulfilled' ? stops.value.data.length : 0,
+        buses: busList.length,
+        busesOperating: busList.filter(b => b.status === 'active').length,
+        drivers: drivers.status === 'fulfilled' ? drivers.value.data.length : 0,
         users: users.status === 'fulfilled' ? users.value.data.length : 0,
         alerts: alerts.status === 'fulfilled' ? alerts.value.data.length : 0,
         delays: delays.status === 'fulfilled' ? delays.value.data.length : 0,
@@ -46,8 +52,11 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem', maxWidth: 900, marginBottom: '2rem' }}>
         {[
           { label: 'Routes', value: stats.routes, color: '#1a5a7a' },
-          { label: 'Buses', value: stats.buses, color: '#1a5a7a' },
+          { label: 'Bus Stops', value: stats.stops, color: '#1a5a7a' },
+          { label: 'Drivers', value: stats.drivers, color: '#1a5a7a' },
           { label: 'Users', value: stats.users, color: '#1a5a7a' },
+          { label: 'Buses', value: stats.buses, color: '#1a5a7a' },
+          { label: 'Buses Operating', value: stats.busesOperating, color: '#2E7D32' },
           { label: 'Active Alerts', value: stats.alerts, color: '#f59e0b' },
           { label: 'Active Delays', value: stats.delays, color: '#ef4444' },
         ].map(s => (

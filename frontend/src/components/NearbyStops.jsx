@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { haversine, RIDE_MIN_PER_STOP } from '../utils/tripPlanner';
+import { haversine } from '../utils/tripPlanner';
 import useSimulatedBus, { etaMinutes } from '../hooks/useSimulatedBus';
 
 function sortedStops(r) {
@@ -11,7 +11,7 @@ function sortedStops(r) {
 
 function RouteEtaBadge({ routeName, fullStops, stopIdx }) {
   const bus = useSimulatedBus(fullStops);
-  const eta = etaMinutes(bus.stopIdx, bus.t, stopIdx, fullStops.length, RIDE_MIN_PER_STOP);
+  const eta = etaMinutes(fullStops, bus.stopIdx, bus.t, stopIdx);
   if (eta === null) return null;
   return (
     <span style={{ background: '#eff6ff', color: '#1a5a7a', borderRadius: 20, padding: '3px 10px', fontSize: '.76rem', fontWeight: 700, whiteSpace: 'nowrap' }}>

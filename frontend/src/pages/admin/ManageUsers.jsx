@@ -13,6 +13,7 @@ export default function ManageUsers() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
   const load = () => api.get('/api/users').then(r => setUsers(r.data));
   useEffect(() => { load(); }, []);
@@ -23,11 +24,21 @@ export default function ManageUsers() {
     catch (err) { setError(err.response?.data?.message || 'Error updating role'); }
   };
 
+  const toggleActive = async (id, isActive) => {
+    setError('');
+    try { await api.put(`/api/users/${id}`, { isActive: !isActive }); load(); }
+    catch (err) { setError(err.response?.data?.message || 'Error updating account status'); }
+  };
+
   const remove = async (id) => {
     if (!window.confirm('Delete this user? This cannot be undone.')) return;
     try { await api.delete(`/api/users/${id}`); load(); }
     catch (err) { setError(err.response?.data?.message || 'Error deleting user'); }
   };
+
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   const roleBadge = (r) => {
     const map = { admin: ['#e3f2fd', '#1565C0'], driver: ['#e8f5e9', '#2e7d32'], commuter: ['#f5f5f5', '#555'] };
@@ -42,16 +53,23 @@ export default function ManageUsers() {
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Manage Users</h1>
         {error && <p style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '.875rem' }}>{error}</p>}
+        <input placeholder="Search by name or email" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: 6, marginBottom: '0.75rem', fontSize: '.9rem' }} />
         <div className="table-scroll" style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead><tr><th style={th}>Name</th><th style={th}>Email</th><th style={th}>Role</th><th style={th}>Change Role</th><th style={th}>Actions</th></tr></thead>
+            <thead><tr><th style={th}>Name</th><th style={th}>Email</th><th style={th}>Role</th><th style={th}>Status</th><th style={th}>Change Role</th><th style={th}>Actions</th></tr></thead>
             <tbody>
-              {users.length === 0 ? <tr><td colSpan={5} style={{ ...td, color: 'var(--text-light)', textAlign: 'center' }}>No users found.</td></tr> :
-                users.map(u => (
+              {filteredUsers.length === 0 ? <tr><td colSpan={6} style={{ ...td, color: 'var(--text-light)', textAlign: 'center' }}>No users found.</td></tr> :
+                filteredUsers.map(u => (
                   <tr key={u.id}>
                     <td style={{ ...td, fontWeight: 500 }}>{u.name}</td>
                     <td style={{ ...td, color: 'var(--text-light)' }}>{u.email}</td>
                     <td style={td}>{roleBadge(u.role)}</td>
+                    <td style={td}>
+                      <span style={{ background: u.isActive ? '#e8f5e9' : '#f5f5f5', color: u.isActive ? '#2e7d32' : '#888', padding: '2px 10px', borderRadius: 20, fontSize: '.78rem', fontWeight: 600 }}>
+                        {u.isActive ? 'Active' : 'Disabled'}
+                      </span>
+                    </td>
                     <td style={td}>
                       <select defaultValue={u.role} onChange={e => changeRole(u.id, e.target.value)}
                         style={{ padding: '0.3rem 0.5rem', border: '1px solid var(--border)', borderRadius: 5, fontSize: '.82rem' }}>
@@ -59,6 +77,8 @@ export default function ManageUsers() {
                       </select>
                     </td>
                     <td style={td}>
+                      <button style={{ ...btn, background: u.isActive ? '#fff3e0' : '#e8f5e9', color: u.isActive ? '#e65100' : '#2e7d32', marginRight: 6 }}
+                        onClick={() => toggleActive(u.id, u.isActive)}>{u.isActive ? 'Deactivate' : 'Activate'}</button>
                       <button style={{ ...btn, background: '#ffe3e3', color: 'var(--danger)' }} onClick={() => remove(u.id)}>Delete</button>
                     </td>
                   </tr>

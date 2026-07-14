@@ -1,10 +1,11 @@
-import { useState, useEffect, Fragment } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, Fragment } from 'react';
+import { TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import ExpandableMap from './ExpandableMap';
+import useSimulatedBus from '../hooks/useSimulatedBus';
+import { routeDistanceMeters, rideMinutesForDistance } from '../utils/tripPlanner';
 
-const STEP_MS = 8000;
-const TICK_MS = 100;
 const LEG_COLORS = ['#1a5a7a', '#2E7D32', '#AD1457', '#E65100'];
 
 function FitBounds({ positions }) {
@@ -39,28 +40,12 @@ const userIcon = L.divIcon({
 });
 
 function LegBus({ leg, color }) {
-  const [idx, setIdx] = useState(0);
-  const [t, setT] = useState(0);
-
-  useEffect(() => {
-    if (leg.stops.length < 2) return;
-    const interval = setInterval(() => {
-      setT(prev => {
-        if (prev >= 1) { setIdx(i => (i + 1) % leg.stops.length); return 0; }
-        return Math.min(prev + TICK_MS / STEP_MS, 1);
-      });
-    }, TICK_MS);
-    return () => clearInterval(interval);
-  }, [leg.stops.length]);
-
-  const cur = leg.stops[idx];
-  const nxt = leg.stops[(idx + 1) % leg.stops.length];
-  const lat = parseFloat(cur.latitude) + t * (parseFloat(nxt.latitude) - parseFloat(cur.latitude));
-  const lng = parseFloat(cur.longitude) + t * (parseFloat(nxt.longitude) - parseFloat(cur.longitude));
+  const bus = useSimulatedBus(leg.stops);
+  if (bus.lat === null) return null;
 
   return (
-    <Marker position={[lat, lng]} icon={busIcon(color)}>
-      <Popup>{leg.routeName} — heading to {nxt.name}</Popup>
+    <Marker position={[bus.lat, bus.lng]} icon={busIcon(color)}>
+      <Popup>{leg.routeName} — heading to {bus.nxt.name}</Popup>
     </Marker>
   );
 }
@@ -99,12 +84,14 @@ export default function TripItinerary({ itinerary, destStop, userPos }) {
       </div>
 
       {/* Map */}
-      <MapContainer
-        style={{ height: 260, width: '100%' }}
-        center={[parseFloat(destStop.latitude), parseFloat(destStop.longitude)]}
-        zoom={13}
-        scrollWheelZoom={false}
-        zoomControl={true}>
+      <ExpandableMap
+        height={260}
+        mapProps={{
+          center: [parseFloat(destStop.latitude), parseFloat(destStop.longitude)],
+          zoom: 13,
+          scrollWheelZoom: false,
+          zoomControl: true,
+        }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -139,7 +126,7 @@ export default function TripItinerary({ itinerary, destStop, userPos }) {
             <Popup>You are here</Popup>
           </Marker>
         )}
-      </MapContainer>
+      </ExpandableMap>
 
       {/* ETA breakdown */}
       <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc' }}>
@@ -149,7 +136,7 @@ export default function TripItinerary({ itinerary, destStop, userPos }) {
           </span>
           {legs.map((l, i) => (
             <span key={i} style={{ fontSize: '.78rem', color: '#6b7280', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '3px 10px' }}>
-              Ride {l.routeName.split('—')[0].trim()} ~{Math.round((l.stops.length - 1) * 3)} min
+              Ride {l.routeName.split('—')[0].trim()} ~{Math.round(rideMinutesForDistance(routeDistanceMeters(l.stops)))} min
             </span>
           ))}
           {transfers > 0 && (

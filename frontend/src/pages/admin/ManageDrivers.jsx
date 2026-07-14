@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllDrivers, createDriver, updateDriver, deleteDriver } from '../../api/driver.api';
 import api from '../../api/axios';
+
+const dateStr = (d) => new Date(d).toLocaleDateString();
 
 const page = { maxWidth: 900, margin: '0 auto', padding: '1.5rem 1rem' };
 const th = { padding: '9px 12px', textAlign: 'left', fontSize: '.82rem', color: 'var(--text-light)', fontWeight: 600, borderBottom: '1px solid var(--border)' };
@@ -19,8 +21,18 @@ export default function ManageDrivers() {
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
 
+  const [expanded, setExpanded] = useState(null);
+  const [assignments, setAssignments] = useState([]);
+
   const load = () => Promise.all([getAllDrivers(), api.get('/api/users')]).then(([d, u]) => { setDrivers(d.data); setUsers(u.data.filter(u => u.role === 'driver')); });
   useEffect(() => { load(); }, []);
+
+  const toggleView = async (driverId) => {
+    if (expanded === driverId) { setExpanded(null); return; }
+    setExpanded(driverId);
+    const r = await api.get(`/api/assignments?driverId=${driverId}`);
+    setAssignments(r.data);
+  };
 
   const submit = async (e) => {
     e.preventDefault(); setError('');
@@ -72,15 +84,34 @@ export default function ManageDrivers() {
             <tbody>
               {drivers.length === 0 ? <tr><td colSpan={4} style={{ ...td, color: 'var(--text-light)', textAlign: 'center' }}>No drivers found.</td></tr> :
                 drivers.map(d => (
-                  <tr key={d.id}>
-                    <td style={{ ...td, fontWeight: 500 }}>{d.User?.name || '-'}</td>
-                    <td style={{ ...td, color: 'var(--text-light)' }}>{d.User?.email || '-'}</td>
-                    <td style={td}>{d.licenseNumber}</td>
-                    <td style={td}>
-                      <button style={{ ...btn, background: '#e3f0ff', color: 'var(--primary)', marginRight: 6 }} onClick={() => startEdit(d)}>Edit</button>
-                      <button style={{ ...btn, background: '#ffe3e3', color: 'var(--danger)' }} onClick={() => remove(d.id)}>Delete</button>
-                    </td>
-                  </tr>
+                  <Fragment key={d.id}>
+                    <tr>
+                      <td style={{ ...td, fontWeight: 500 }}>{d.User?.name || '-'}</td>
+                      <td style={{ ...td, color: 'var(--text-light)' }}>{d.User?.email || '-'}</td>
+                      <td style={td}>{d.licenseNumber}</td>
+                      <td style={td}>
+                        <button style={{ ...btn, background: '#eef2f7', color: '#374151', marginRight: 6 }} onClick={() => toggleView(d.id)}>{expanded === d.id ? 'Hide' : 'View'}</button>
+                        <button style={{ ...btn, background: '#e3f0ff', color: 'var(--primary)', marginRight: 6 }} onClick={() => startEdit(d)}>Edit</button>
+                        <button style={{ ...btn, background: '#ffe3e3', color: 'var(--danger)' }} onClick={() => remove(d.id)}>Delete</button>
+                      </td>
+                    </tr>
+                    {expanded === d.id && (
+                      <tr>
+                        <td colSpan={4} style={{ ...td, background: '#fafbfc' }}>
+                          <div style={{ fontWeight: 600, fontSize: '.85rem', marginBottom: 6 }}>Assignments</div>
+                          {assignments.length === 0 ? <p style={{ color: 'var(--text-light)', fontSize: '.85rem' }}>No assignments found.</p> : (
+                            <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                              {assignments.map(a => (
+                                <li key={a.id} style={{ fontSize: '.85rem', marginBottom: 4 }}>
+                                  {dateStr(a.assignmentDate)} — {a.Route?.name || '-'} on bus {a.Bus?.plateNumber || '-'}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
             </tbody>
           </table>

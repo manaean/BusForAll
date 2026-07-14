@@ -19,6 +19,8 @@ const AuthService = {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw Object.assign(new Error('Invalid email or password'), { status: 401 });
 
+    if (!user.isActive) throw Object.assign(new Error('Account is disabled'), { status: 403 });
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,

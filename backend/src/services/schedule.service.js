@@ -18,11 +18,11 @@ const ScheduleService = {
   getByRouteId: (routeId) =>
     Schedule.findAll({ where: { routeId }, order: [['departure_time', 'ASC']] }),
 
-  create: async ({ routeId, departureTime, arrivalTime, days }) => {
+  create: async ({ routeId, departureTime, arrivalTime, days, frequencyMinutes }) => {
     if (!routeId || !departureTime || !arrivalTime) {
       throw Object.assign(new Error('routeId, departureTime, and arrivalTime are required'), { status: 400 });
     }
-    return Schedule.create({ routeId, departureTime, arrivalTime, days: days || 'Mon,Tue,Wed,Thu,Fri' });
+    return Schedule.create({ routeId, departureTime, arrivalTime, days: days || 'Mon,Tue,Wed,Thu,Fri', frequencyMinutes: frequencyMinutes || null });
   },
 
   update: async (id, data) => {

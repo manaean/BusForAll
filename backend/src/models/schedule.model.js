@@ -6,7 +6,8 @@ const Schedule = sequelize.define('Schedule', {
   routeId: { type: DataTypes.INTEGER, allowNull: false },
   departureTime: { type: DataTypes.TIME, allowNull: false },
   arrivalTime: { type: DataTypes.TIME, allowNull: false },
-  days: { type: DataTypes.STRING(50), allowNull: false, defaultValue: 'Mon,Tue,Wed,Thu,Fri' }
+  days: { type: DataTypes.STRING(50), allowNull: false, defaultValue: 'Mon,Tue,Wed,Thu,Fri' },
+  frequencyMinutes: { type: DataTypes.INTEGER, allowNull: true }
 }, {
   tableName: 'schedules',
   timestamps: true,

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
+import { TileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getRouteById } from '../api/route.api';
-
-const STEP_MS = 6000;
-const TICK_MS = 100;
+import ExpandableMap from './ExpandableMap';
+import useSimulatedBus from '../hooks/useSimulatedBus';
 
 function FitBounds({ positions }) {
   const map = useMap();
@@ -18,11 +17,10 @@ function FitBounds({ positions }) {
 export default function BusTracker({ routeId }) {
   const [route, setRoute] = useState(null);
   const [stops, setStops] = useState([]);
-  const [stopIdx, setStopIdx] = useState(0);
-  const [t, setT] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userPos, setUserPos] = useState(null);
+  const bus = useSimulatedBus(stops);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -46,28 +44,11 @@ export default function BusTracker({ routeId }) {
       .catch(() => { setError('Could not load route data.'); setLoading(false); });
   }, [routeId]);
 
-  useEffect(() => {
-    if (stops.length < 2) return;
-    const interval = setInterval(() => {
-      setT(prev => {
-        if (prev >= 1) {
-          setStopIdx(i => (i + 1) % stops.length);
-          return 0;
-        }
-        return Math.min(prev + TICK_MS / STEP_MS, 1);
-      });
-    }, TICK_MS);
-    return () => clearInterval(interval);
-  }, [stops]);
-
   if (loading) return <div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>Loading map...</div>;
   if (error) return <div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>{error}</div>;
   if (stops.length < 2) return <div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>Not enough stop coordinates to simulate tracking.</div>;
 
-  const current = stops[stopIdx];
-  const next = stops[(stopIdx + 1) % stops.length];
-  const busLat = parseFloat(current.latitude) + t * (parseFloat(next.latitude) - parseFloat(current.latitude));
-  const busLng = parseFloat(current.longitude) + t * (parseFloat(next.longitude) - parseFloat(current.longitude));
+  const { stopIdx, t, lat: busLat, lng: busLng, cur: current, nxt: next } = bus;
   const positions = stops.map(s => [parseFloat(s.latitude), parseFloat(s.longitude)]);
   const progress = Math.round(((stopIdx + t) / stops.length) * 100);
 
@@ -95,11 +76,10 @@ export default function BusTracker({ routeId }) {
 
   return (
     <div>
-      <MapContainer
-        style={{ height: 420, width: '100%', borderRadius: 12, overflow: 'hidden' }}
-        center={positions[0]}
-        zoom={14}
-        scrollWheelZoom={true}>
+      <ExpandableMap
+        height={420}
+        borderRadius={12}
+        mapProps={{ center: positions[0], zoom: 14, scrollWheelZoom: true }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -138,7 +118,7 @@ export default function BusTracker({ routeId }) {
             <Popup>You are here</Popup>
           </Marker>
         )}
-      </MapContainer>
+      </ExpandableMap>
 
       {/* Status bar */}
       <div style={{ marginTop: '1rem', background: '#fff', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid #e5e7eb' }}>

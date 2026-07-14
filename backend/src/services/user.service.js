@@ -18,11 +18,16 @@ const UserService = {
     return { id: user.id, name: user.name, email: user.email, role: user.role };
   },
 
-  update: async (id, { name, email, role }) => {
+  update: async (id, { name, email, role, isActive }) => {
     const user = await User.findByPk(id);
     if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
-    await user.update({ name, email, role });
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
+    const changes = {};
+    if (name !== undefined) changes.name = name;
+    if (email !== undefined) changes.email = email;
+    if (role !== undefined) changes.role = role;
+    if (isActive !== undefined) changes.isActive = isActive;
+    await user.update(changes);
+    return { id: user.id, name: user.name, email: user.email, role: user.role, isActive: user.isActive };
   },
 
   delete: async (id) => {
