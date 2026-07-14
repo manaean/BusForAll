@@ -198,7 +198,9 @@ export default function Routes() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1.5rem' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
+        <button onClick={() => navigate(-1)} className="back-link" style={{ background: 'none', border: 'none', borderRadius: 999, cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 600, padding: '0.4rem 0.85rem', margin: '0 0 0.75rem -0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          &#8592; <span className="back-link-text">Back</span>
+        </button>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', marginBottom: '0.35rem' }}>All Routes</h1>
         <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Browse routes or type a destination to see live tracking and ETA.</p>
 

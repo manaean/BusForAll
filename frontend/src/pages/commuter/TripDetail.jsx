@@ -179,9 +179,9 @@ export default function TripDetail() {
         {card(
           <div style={{ padding: '1rem 1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-              <button onClick={() => navigate(-1)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: 0, display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-                &#8592; Back
+              <button onClick={() => navigate(-1)} className="back-link"
+                style={{ background: 'none', border: 'none', borderRadius: 999, cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 600, padding: '0.4rem 0.85rem', margin: '-0.4rem 0 -0.4rem -0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                &#8592; <span className="back-link-text">Back</span>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                 {option.legs.map((l, i) => (

@@ -52,6 +52,26 @@
   transform: translateY(-1px);
 }
 
+/* Back links */
+.back-link {
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.back-link .back-link-text {
+  transition: font-size 150ms ease;
+}
+.back-link:hover,
+.back-link:focus-visible {
+  background: #dbeafe !important;
+  color: var(--primary) !important;
+}
+.back-link:hover .back-link-text,
+.back-link:focus-visible .back-link-text {
+  font-size: 1.05rem;
+}
+.back-link:active {
+  transform: scale(0.96);
+}
+
 /* Route list cards */
 .route-list-card:hover {
   transform: translateY(-3px);
