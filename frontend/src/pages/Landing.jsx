@@ -43,8 +43,9 @@ export default function Landing() {
 
       {/* Hero */}
       <div style={{
-        /* swap to: backgroundImage: 'linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)), url(/bus-photo.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' */
-        background: 'linear-gradient(135deg, #0f2a3d 0%, #1a5a7a 60%, #2a7a9a 100%)',
+        backgroundImage: "url('/bus-hero.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         padding: '4rem 2rem 3.5rem',
         color: '#fff',
       }}>
@@ -60,15 +61,15 @@ export default function Landing() {
           <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.8)', maxWidth: 500, marginBottom: '2rem', lineHeight: 1.6 }}>
             Real-time tracking, accurate schedules, and instant alerts for all your transit needs.
           </p>
-          <form onSubmit={handleSearch} style={{ display: 'flex', maxWidth: 560, background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,.2)' }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', width: '100%', maxWidth: 520, minHeight: 44, background: '#fff', borderRadius: 9, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,.2)' }}>
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Where are you going?"
-              style={{ flex: 1, border: 'none', padding: '0.9rem 1.25rem', fontSize: '.95rem', outline: 'none', color: '#374151', background: 'transparent' }}
+              style={{ flex: 1, border: 'none', padding: '0.7rem 1rem', fontSize: '.875rem', outline: 'none', color: '#374151', background: 'transparent' }}
             />
-            <button type="submit" style={{ padding: '0 1.5rem', background: '#1a5a7a', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '.9rem', whiteSpace: 'nowrap' }}>
+            <button type="submit" style={{ padding: '0 1rem', background: '#1a5a7a', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '.85rem', whiteSpace: 'nowrap' }}>
               Search Routes
             </button>
           </form>
@@ -81,10 +82,10 @@ export default function Landing() {
       <div className="landing-grid" style={{ maxWidth: 1100, margin: '2rem auto', padding: '0 1.5rem' }}>
 
         {/* Live Status */}
-        <div className="landing-live-status" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
+        <div className="landing-live-status app-card" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', margin: 0 }}>Live Status</h2>
-            <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: 20 }}>All Systems Go</span>
+            <span className="status-badge status-badge-success">All Systems Go</span>
           </div>
           {alerts.length === 0 ? (
             <p style={{ color: '#9ca3af', fontSize: '.875rem' }}>No active alerts.</p>
@@ -100,7 +101,7 @@ export default function Landing() {
         </div>
 
         {/* Routes */}
-        <div className="landing-routes" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
+        <div className="landing-routes app-card" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', margin: 0 }}>Routes</h2>
             <Link to="/routes" style={{ color: '#1a5a7a', fontSize: '.85rem', fontWeight: 600, textDecoration: 'none' }}>View All</Link>
@@ -109,14 +110,14 @@ export default function Landing() {
             {routes.length === 0 ? (
               <p style={{ color: '#9ca3af', fontSize: '.875rem', gridColumn: 'span 2' }}>No routes available.</p>
             ) : routes.slice(0, 4).map(r => (
-              <Link key={r.id} to={`/schedule/${r.id}`} style={{ textDecoration: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.9rem 1rem', display: 'block' }}>
+              <Link key={r.id} className="route-card" to={`/schedule/${r.id}`} style={{ textDecoration: 'none', padding: '0.9rem 1rem', display: 'block' }}>
                 <div style={{ marginBottom: '0.4rem' }}>
                   <span style={{ background: '#1a5a7a', color: '#fff', fontSize: '.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>Route {r.id}</span>
                 </div>
                 <div style={{ fontWeight: 600, fontSize: '.88rem', color: '#111827', marginBottom: '0.35rem' }}>{getRouteLabel(r)}</div>
                 {(() => { const d = getRouteStatus(r.id); return d
-                  ? <div style={{ fontSize: '.78rem', color: '#f59e0b', fontWeight: 500 }}>+{d.delayMinutes} min delay</div>
-                  : <div style={{ fontSize: '.78rem', color: '#16a34a', fontWeight: 500 }}>On Time</div>;
+                  ? <span className="status-badge status-badge-warning">+{d.delayMinutes} min delay</span>
+                  : <span className="status-badge status-badge-success">On Time</span>;
                 })()}
               </Link>
             ))}
@@ -124,13 +125,13 @@ export default function Landing() {
         </div>
 
         {/* Nearby Stops */}
-        <div className="landing-nearby" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
+        <div className="landing-nearby app-card" style={{ padding: '1.25rem' }}>
           <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', marginBottom: '0.75rem' }}>Nearby Stops</h2>
           <NearbyStops routes={routes} maxStops={4} />
         </div>
 
         {/* Map */}
-        <div className="landing-map" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb', minHeight: 220 }}>
+        <div className="landing-map app-card" style={{ overflow: 'hidden', minHeight: 220 }}>
           <img src="/all-route-map.jpg" alt="Phnom Penh Bus Route Map" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
 
@@ -144,6 +145,17 @@ export default function Landing() {
             <p style={{ fontSize: '.875rem', color: '#94a3b8', lineHeight: 1.7, margin: 0 }}>
               Providing safe, reliable, and accessible transportation for everyone in Phnom Penh.
             </p>
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '.875rem' }}>
+              <a href="mailto:busforall@gmail.com" style={{ color: '#cbd5e1', textDecoration: 'none' }}>✉ busforall@gmail.com</a>
+              <a href="tel:+85512345678" style={{ color: '#cbd5e1', textDecoration: 'none' }}>☎ +855 12 345 678</a>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              {['f', '◎', '𝕏'].map((icon, index) => (
+                <a key={icon} href="#" aria-label={['Facebook', 'Instagram', 'X'][index]} style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a4a6a', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontWeight: 700, fontSize: index === 1 ? '1.1rem' : '.85rem' }}>
+                  {icon}
+                </a>
+              ))}
+            </div>
           </div>
           <div style={{ flex: 1, minWidth: 130 }}>
             <div style={{ fontWeight: 700, fontSize: '.9rem', marginBottom: '0.75rem', color: '#fff' }}>Quick Links</div>
@@ -154,16 +166,17 @@ export default function Landing() {
             ))}
           </div>
           <div style={{ flex: 1, minWidth: 130 }}>
-            <div style={{ fontWeight: 700, fontSize: '.9rem', marginBottom: '0.75rem', color: '#fff' }}>Support</div>
-            {['Contact', 'Privacy Policy', 'Terms of Service', 'Accessibility'].map(l => (
-              <div key={l} style={{ marginBottom: '0.45rem' }}>
-                <span style={{ color: '#94a3b8', fontSize: '.875rem' }}>{l}</span>
-              </div>
-            ))}
+            <div style={{ fontWeight: 700, fontSize: '.9rem', marginBottom: '0.75rem', color: '#fff' }}>Get the App</div>
+            <a href="#" style={{ display: 'block', width: 'fit-content', marginBottom: '0.6rem', padding: '0.55rem 0.8rem', borderRadius: 8, background: '#fff', color: '#1a3a52', textDecoration: 'none', fontSize: '.78rem', fontWeight: 700 }}>
+              ▶ Google Play
+            </a>
+            <a href="#" style={{ display: 'block', width: 'fit-content', padding: '0.55rem 0.8rem', borderRadius: 8, background: '#fff', color: '#1a3a52', textDecoration: 'none', fontSize: '.78rem', fontWeight: 700 }}>
+              ● App Store
+            </a>
           </div>
         </div>
         <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: '1.5rem', borderTop: '1px solid #2a4a6a', textAlign: 'center', fontSize: '.8rem', color: '#64748b' }}>
-          2024 Bus For All. All rights reserved.
+          © {new Date().getFullYear()} Bus For All. All rights reserved.
         </div>
       </footer>
     </div>

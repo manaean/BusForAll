@@ -9,29 +9,25 @@ function sortedStops(r) {
     .filter(s => s.latitude && s.longitude);
 }
 
-function RouteEtaBadge({ routeName, fullStops, stopIdx }) {
+function RouteStopDetails({ routeName, fullStops, stopIdx, dist }) {
   const bus = useSimulatedBus(fullStops);
   const eta = etaMinutes(fullStops, bus.stopIdx, bus.t, stopIdx);
-  if (eta === null) return null;
   return (
-    <span style={{ background: '#eff6ff', color: '#1a5a7a', borderRadius: 20, padding: '3px 10px', fontSize: '.76rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-      {routeName.split('—')[0].split('(')[0].trim()} · {eta} min
-    </span>
+    <div style={{ marginTop: '0.45rem', paddingLeft: '0.2rem', fontSize: '.8rem', color: '#4b5563', lineHeight: 1.8 }}>
+      <div>🚌 <span style={{ fontWeight: 600, color: '#1a5a7a' }}>{routeName.split('—')[0].split('(')[0].trim()}</span></div>
+      <div>🚶 {Math.round(dist)} m</div>
+      {eta !== null && <div>⏱ Next Bus <span style={{ fontWeight: 700, color: '#15803d' }}>{eta} min</span></div>}
+    </div>
   );
 }
 
 function NearbyStopRow({ stop, dist, servingRoutes }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', padding: '0.65rem 0', borderBottom: '1px solid #f3f4f6' }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 600, fontSize: '.88rem', color: '#111827' }}>{stop.name}</div>
-        <div style={{ fontSize: '.78rem', color: '#9ca3af', marginTop: 2 }}>{Math.round(dist)}m walk</div>
-      </div>
-      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-        {servingRoutes.map(r => (
-          <RouteEtaBadge key={r.routeId} routeName={r.routeName} fullStops={r.fullStops} stopIdx={r.stopIdx} />
-        ))}
-      </div>
+    <div style={{ padding: '0.8rem 0', borderBottom: '1px solid #f3f4f6' }}>
+      <div style={{ fontWeight: 700, fontSize: '.9rem', color: '#111827' }}>📍 {stop.name}</div>
+      {servingRoutes.map(r => (
+        <RouteStopDetails key={r.routeId} routeName={r.routeName} fullStops={r.fullStops} stopIdx={r.stopIdx} dist={dist} />
+      ))}
     </div>
   );
 }

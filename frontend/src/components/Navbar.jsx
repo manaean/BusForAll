@@ -23,8 +23,8 @@ export default function Navbar({ onMenuClick }) {
         )}
         <Link to="/" style={{ fontWeight: 800, fontSize: '1.15rem', color: '#1a3a52', textDecoration: 'none' }}>Bus For All</Link>
         <div className="nav-links" style={{ display: 'flex', gap: '1.5rem' }}>
-          <Link to="/routes" style={linkStyle}>Routes</Link>
-          <Link to="/alerts" style={linkStyle}>Alerts</Link>
+          <Link to="/routes" className="nav-link" style={linkStyle}>Routes</Link>
+          <Link to="/alerts" className="nav-link" style={linkStyle}>Alerts</Link>
         </div>
       </div>
 

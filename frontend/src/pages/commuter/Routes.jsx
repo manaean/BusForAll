@@ -336,11 +336,9 @@ export default function Routes() {
                 const stops = sortedStops(r).filter(s => s.latitude && s.longitude);
                 const distanceKm = stops.length > 1 ? routeDistanceMeters(stops) / 1000 : null;
                 return (
-                  <div key={r.id}
+                  <div key={r.id} className="route-list-card"
                     onClick={() => navigate(`/schedule/${r.id}`)}
-                    style={{ background: '#fff', borderRadius: 12, padding: '1.25rem 1.5rem', border: '1px solid #e5e7eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,.04)', transition: 'box-shadow .15s' }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,.09)'}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,.04)'}>
+                    style={{ background: '#fff', borderRadius: 12, padding: '1.25rem 1.5rem', border: '1px solid #e5e7eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,.04)', transition: 'transform .2s ease, box-shadow .2s ease' }}>
                     <div style={{ width: 46, height: 46, borderRadius: 10, background: color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
                       {i + 1}
                     </div>
@@ -352,9 +350,9 @@ export default function Routes() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                      <Link to={`/tracker/${r.id}`} onClick={e => e.stopPropagation()}
+                      <Link to={`/tracker/${r.id}`} className="track-bus-button" onClick={e => e.stopPropagation()}
                         style={{ padding: '6px 14px', background: '#eff6ff', color: 'var(--primary)', borderRadius: 20, fontSize: '.8rem', fontWeight: 600, textDecoration: 'none' }}>
-                        Track Live
+                        🟢 Live Tracking
                       </Link>
                       <button onClick={e => toggleFav(e, r.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.3rem', color: isFav ? '#f59e0b' : '#d1d5db', padding: '0 4px' }}

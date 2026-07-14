@@ -39,6 +39,31 @@
   justify-content: center;
 }
 
+/* Main navigation links */
+.nav-link {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: #12324a !important;
+  background: #dbeef7;
+  transform: translateY(-1px);
+}
+
+/* Route list cards */
+.route-list-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(15, 42, 61, 0.16);
+}
+.route-list-card:hover .track-bus-button,
+.track-bus-button:hover,
+.track-bus-button:focus-visible {
+  background: #1565c0 !important;
+  color: #fff !important;
+}
+
 /* Schedule: content + sidebar */
 .schedule-layout {
   display: grid;
@@ -172,6 +197,41 @@
 }
 
 /* Landing page grid layout */
+.app-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(15, 42, 61, 0.08);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.app-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(15, 42, 61, 0.14);
+}
+.route-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 42, 61, 0.06);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.route-card:hover {
+  transform: translateY(-2px);
+  border-color: #8dc0d7;
+  box-shadow: 0 8px 18px rgba(15, 42, 61, 0.12);
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.status-badge-success { background: #dcfce7; color: #15803d; }
+.status-badge-warning { background: #fef3c7; color: #b45309; }
+
 .landing-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -182,7 +242,12 @@
 .landing-live-status { grid-column: 1; grid-row: 1; }
 .landing-routes      { grid-column: 2; grid-row: 1; }
 .landing-nearby      { grid-column: 1; grid-row: 2; }
-.landing-map         { grid-column: 2; grid-row: 2; }
+.landing-map {
+  grid-column: 2;
+  grid-row: 2;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(15, 42, 61, 0.12);
+}
 
 @media (max-width: 700px) {
   .landing-grid {
