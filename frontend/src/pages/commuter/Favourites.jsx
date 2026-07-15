@@ -23,7 +23,9 @@ export default function Favourites() {
     <>
       
       <div style={page}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
+        <button onClick={() => navigate(-1)} className="back-link" style={{ background: 'none', border: 'none', borderRadius: 999, cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 600, padding: '0.4rem 0.85rem', margin: '0 0 0.75rem -0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          &#8592; <span className="back-link-text">Back</span>
+        </button>
         <h1 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '1rem' }}>My Favourite Routes</h1>
         {loading ? <p style={{ color: 'var(--text-light)' }}>Loading...</p> : favs.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-light)' }}>
