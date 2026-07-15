@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 
 const navLinks = [
   { to: '/admin/tracking', label: 'Live Tracking' },
@@ -15,8 +16,20 @@ const navLinks = [
   { to: '/admin/users', label: 'Manage Users' },
 ];
 
+const metaItemStyle = { display: 'flex', flexDirection: 'column', gap: 2 };
+const metaLabelStyle = { fontSize: '.72rem', color: 'rgba(255,255,255,0.65)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' };
+const metaValueStyle = { fontSize: '.9rem', color: '#fff', fontWeight: 700 };
+
 export default function Dashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState({});
+  const [now, setNow] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     Promise.allSettled([
@@ -39,14 +52,35 @@ export default function Dashboard() {
         alerts: alerts.status === 'fulfilled' ? alerts.value.data.length : 0,
         delays: delays.status === 'fulfilled' ? delays.value.data.length : 0,
       });
+      setLastUpdated(new Date());
     });
   }, []);
 
+  const dateStr = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const lastUpdatedStr = lastUpdated ? lastUpdated.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—';
+
   return (
     <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h1 style={{ fontWeight: 800, fontSize: '1.55rem', color: '#111827', margin: 0 }}>Admin Dashboard</h1>
-        <p style={{ color: '#6b7280', fontSize: '.875rem', marginTop: '0.25rem', marginBottom: 0 }}>System overview and quick navigation.</p>
+      <div style={{
+        marginBottom: '1.75rem', background: 'linear-gradient(135deg, #1a5a7a 0%, #123f57 100%)',
+        borderRadius: 16, padding: '1.75rem 2rem',
+      }}>
+        <h1 style={{ fontWeight: 800, fontSize: '1.55rem', color: '#fff', margin: 0 }}>Welcome back, {user?.name || 'Admin'}.</h1>
+        <div style={{ display: 'flex', gap: '1.75rem', flexWrap: 'wrap', marginTop: '1.1rem' }}>
+          <div style={metaItemStyle}>
+            <span style={metaLabelStyle}>Today's Date</span>
+            <span style={metaValueStyle}>{dateStr}</span>
+          </div>
+          <div style={metaItemStyle}>
+            <span style={metaLabelStyle}>Current Time</span>
+            <span style={metaValueStyle}>{timeStr}</span>
+          </div>
+          <div style={metaItemStyle}>
+            <span style={metaLabelStyle}>Last System Update</span>
+            <span style={metaValueStyle}>{lastUpdatedStr}</span>
+          </div>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem', maxWidth: 900, marginBottom: '2rem' }}>
@@ -60,7 +94,7 @@ export default function Dashboard() {
           { label: 'Active Alerts', value: stats.alerts, color: '#f59e0b' },
           { label: 'Active Delays', value: stats.delays, color: '#ef4444' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
+          <div key={s.label} className="dashboard-stat-card" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.25rem' }}>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: s.color }}>{s.value ?? '-'}</div>
             <div style={{ fontSize: '.82rem', color: '#6b7280', marginTop: 2 }}>{s.label}</div>
           </div>
@@ -70,7 +104,7 @@ export default function Dashboard() {
       <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem' }}>Management</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.6rem', maxWidth: 900 }}>
         {navLinks.map(l => (
-          <Link key={l.to} to={l.to} style={{ display: 'block', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.85rem 1rem', textDecoration: 'none', color: '#1a5a7a', fontWeight: 500, fontSize: '.9rem' }}>
+          <Link key={l.to} to={l.to} className="dashboard-nav-button" style={{ display: 'block', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.85rem 1rem', textDecoration: 'none', color: '#1a5a7a', fontWeight: 500, fontSize: '.9rem' }}>
             {l.label}
           </Link>
         ))}

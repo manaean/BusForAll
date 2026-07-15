@@ -61,8 +61,8 @@ export default function Login() {
       {/* Card */}
       <div style={{ background: '#fff', borderRadius: 16, padding: '2rem 2.25rem', width: '100%', maxWidth: 440, boxShadow: '0 4px 32px rgba(0,0,0,.1)' }}>
         <div style={{ marginBottom: '1.25rem' }}>
-          <Link to="/" style={{ fontSize: '.85rem', color: '#5a7a90', textDecoration: 'none', fontWeight: 500 }}>
-            &#8592; Back
+          <Link to="/" className="back-link" style={{ fontSize: '.85rem', color: '#5a7a90', textDecoration: 'none', fontWeight: 600, borderRadius: 999, padding: '0.4rem 0.85rem', margin: '-0.4rem 0 -0.4rem -0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            &#8592; <span className="back-link-text">Back</span>
           </Link>
         </div>
         <h2 style={{ fontWeight: 800, fontSize: '1.35rem', color: '#0f172a', marginBottom: '1.5rem' }}>Welcome back</h2>

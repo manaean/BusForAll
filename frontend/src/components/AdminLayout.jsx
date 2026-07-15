@@ -41,7 +41,7 @@ export default function AdminLayout() {
             <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1a3a52' }}>Bus For All</div>
             <div style={{ fontSize: '.73rem', color: '#9ca3af', marginTop: 2 }}>Admin Portal</div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1 }}>&#10005;</button>
+          <button onClick={() => setSidebarOpen(false)} className="admin-icon-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1 }}>&#10005;</button>
         </div>
 
         <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

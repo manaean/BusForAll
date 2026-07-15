@@ -134,6 +134,52 @@
   gap: 0.6rem;
 }
 
+/* Admin dashboard micro-interactions */
+.dashboard-stat-card {
+  transition: transform 200ms ease-in-out, box-shadow 200ms ease-in-out;
+}
+.dashboard-stat-card:hover,
+.dashboard-stat-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(15, 42, 61, 0.14);
+}
+
+.dashboard-nav-button {
+  transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out, transform 200ms ease-in-out, box-shadow 200ms ease-in-out;
+}
+.dashboard-nav-button:hover,
+.dashboard-nav-button:focus-visible {
+  background: #eaf2f7 !important;
+  border-color: #b8d4e3 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 42, 61, 0.1);
+}
+.dashboard-nav-button:active {
+  transform: translateY(0);
+}
+
+.admin-icon-btn {
+  transition: transform 200ms ease-in-out, color 200ms ease-in-out;
+}
+.admin-icon-btn:hover,
+.admin-icon-btn:focus-visible {
+  transform: scale(1.05);
+  color: #1a5a7a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-stat-card,
+  .dashboard-nav-button,
+  .admin-icon-btn {
+    transition: none !important;
+  }
+  .dashboard-stat-card:hover,
+  .dashboard-nav-button:hover,
+  .admin-icon-btn:hover {
+    transform: none !important;
+  }
+}
+
 /* ── Tablet (≤ 900px) ────────────────────────────────────────── */
 @media (max-width: 900px) {
   .schedule-layout {
