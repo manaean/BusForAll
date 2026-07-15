@@ -286,6 +286,15 @@
   border-color: #8dc0d7;
   box-shadow: 0 8px 18px rgba(15, 42, 61, 0.12);
 }
+.driver-live-card {
+  box-shadow: 0 3px 12px rgba(15, 42, 61, 0.08);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.driver-live-card:hover {
+  transform: translateY(-4px);
+  border-color: #8dc0d7 !important;
+  box-shadow: 0 16px 32px rgba(15, 42, 61, 0.2);
+}
 .status-badge {
   display: inline-flex;
   align-items: center;

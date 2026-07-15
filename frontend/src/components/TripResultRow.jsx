@@ -20,7 +20,7 @@ function legRideMinutes(leg) {
   return rideMinutesForDistance(routeDistanceMeters(ridden));
 }
 
-export default function TripResultRow({ option, delayMinutes = 0, onSelect }) {
+export default function TripResultRow({ option, delayMinutes = 0, onSelect, isFav, onFavToggle }) {
   const firstLeg = option.legs[0];
   const bus = useSimulatedBus(firstLeg.fullStops);
 
@@ -86,6 +86,13 @@ export default function TripResultRow({ option, delayMinutes = 0, onSelect }) {
           {arrivalDate ? ` · arrives ${formatTime(arrivalDate)}` : ''}
         </div>
       </div>
+
+      {onFavToggle && (
+        <button onClick={onFavToggle} title={isFav ? 'Remove favourite' : 'Save route'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.3rem', color: isFav ? '#f59e0b' : '#d1d5db', padding: '0 4px', flexShrink: 0 }}>
+          {isFav ? '★' : '☆'}
+        </button>
+      )}
 
       <div style={{ color: '#9ca3af', fontSize: '1.1rem', flexShrink: 0 }}>&#8250;</div>
     </div>

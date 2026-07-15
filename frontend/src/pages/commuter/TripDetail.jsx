@@ -9,6 +9,8 @@ import TripItinerary from '../../components/TripItinerary';
 import ExpandableMap from '../../components/ExpandableMap';
 import useSimulatedBus, { etaMinutes } from '../../hooks/useSimulatedBus';
 import { haversine, routeDistanceMeters, rideMinutesForDistance } from '../../utils/tripPlanner';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 const LEG_COLORS = ['#1a5a7a', '#2E7D32', '#AD1457', '#E65100'];
 
@@ -65,6 +67,7 @@ export default function TripDetail() {
   const { routeId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const option = state?.option || null;
   const primaryStops = option?.legs[0]?.fullStops || [];
@@ -74,6 +77,7 @@ export default function TripDetail() {
   const [locationError, setLocationError] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [delayMinutes, setDelayMinutes] = useState(state?.delayMinutes || 0);
+  const [isFav, setIsFav] = useState(false);
 
   useEffect(() => {
     getSchedulesByRoute(routeId).then(r => setSchedules(r.data)).catch(() => {});
@@ -83,7 +87,21 @@ export default function TripDetail() {
         if (d) setDelayMinutes(d.delayMinutes);
       }).catch(() => {});
     }
-  }, [routeId]); // eslint-disable-line
+    if (user) {
+      api.get('/api/favourites').then(r => setIsFav(r.data.some(f => f.routeId === parseInt(routeId)))).catch(() => {});
+    }
+  }, [routeId, user]); // eslint-disable-line
+
+  const toggleFav = async () => {
+    if (!user) { navigate('/login'); return; }
+    if (isFav) {
+      await api.delete(`/api/favourites/${routeId}`);
+      setIsFav(false);
+    } else {
+      await api.post(`/api/favourites/${routeId}`);
+      setIsFav(true);
+    }
+  };
 
   // Must be called before any conditional return
   const bus = useSimulatedBus(primaryStops);
@@ -201,6 +219,10 @@ export default function TripDetail() {
                   {isDelayed ? `Delayed +${delayMinutes} min` : 'On Time'}
                 </span>
               </div>
+              <button onClick={toggleFav} title={isFav ? 'Remove favourite' : 'Save route'}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.4rem', color: isFav ? '#f59e0b' : '#d1d5db', padding: '0 4px', marginLeft: 'auto', flexShrink: 0 }}>
+                {isFav ? '★' : '☆'}
+              </button>
             </div>
             <div style={{ fontSize: '.9rem', color: '#374151', fontWeight: 500 }}>
               {routeFrom} &#8594; {routeTo}

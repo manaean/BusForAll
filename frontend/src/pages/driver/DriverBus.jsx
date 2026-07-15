@@ -29,7 +29,9 @@ export default function DriverBus() {
       
       <div style={{ ...page, color: 'var(--text-light)', textAlign: 'center', paddingTop: '3rem' }}>
         <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>No active route found.</p>
-        <Link to="/driver" style={{ color: 'var(--primary)', fontWeight: 600 }}>Back to Home</Link>
+        <Link to="/driver" className="back-link" style={{ color: 'var(--primary)', fontWeight: 600, borderRadius: 999, padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center' }}>
+          <span className="back-link-text">Back to Home</span>
+        </Link>
       </div>
     </>
   );
@@ -38,7 +40,9 @@ export default function DriverBus() {
     <>
       
       <div style={page}>
-        <Link to="/driver" style={{ color: 'var(--primary)', fontSize: '.875rem', textDecoration: 'none' }}>← Back to Home</Link>
+        <Link to="/driver" className="back-link" style={{ color: 'var(--primary)', fontSize: '.875rem', fontWeight: 600, textDecoration: 'none', borderRadius: 999, padding: '0.4rem 0.85rem', margin: '-0.4rem 0 0 -0.85rem', display: 'inline-flex', alignItems: 'center' }}>
+          ← <span className="back-link-text">Back to Home</span>
+        </Link>
         <h1 style={{ fontSize: '1.3rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>My Bus Status</h1>
         {assignment && (
           <p style={{ color: 'var(--text-light)', fontSize: '.875rem', marginBottom: '1rem' }}>
@@ -46,7 +50,7 @@ export default function DriverBus() {
           </p>
         )}
 
-        <div style={card}>
+        <div className="driver-live-card" style={card}>
           <h2 style={{ fontWeight: 600, fontSize: '.95rem', marginBottom: '0.75rem' }}>Live Position</h2>
           <BusTracker routeId={routeId} />
         </div>

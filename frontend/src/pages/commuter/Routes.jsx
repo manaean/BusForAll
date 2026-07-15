@@ -316,6 +316,8 @@ export default function Routes() {
                     key={opt.key}
                     option={opt}
                     delayMinutes={delayByRoute.get(opt.legs[0].routeId) || 0}
+                    isFav={favourites.includes(opt.legs[0].routeId)}
+                    onFavToggle={e => toggleFav(e, opt.legs[0].routeId)}
                     onSelect={() => navigate(`/trip/${opt.legs[0].routeId}`, {
                       state: { option: opt, userLocation: effectiveOrigin, delayMinutes: delayByRoute.get(opt.legs[0].routeId) || 0 },
                     })}
