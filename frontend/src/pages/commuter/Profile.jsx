@@ -1,22 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
-import { useEffect } from 'react';
+import { updateMe, changePassword } from '../../api/auth.api';
 
-const sidebar = [
-  { label: 'Profile', to: '/profile' },
-  { label: 'Favourites', to: '/favourites' },
-];
+const inp = {
+  width: '100%',
+  padding: '0.6rem 0.85rem',
+  border: '1.5px solid #d1d5db',
+  borderRadius: 8,
+  fontSize: '.9rem',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const label = { fontSize: '.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 };
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
+  const isCommuter = user?.role === 'commuter';
+  const sidebar = [
+    { label: 'Profile', to: '/profile' },
+    ...(isCommuter ? [{ label: 'Favourites', to: '/favourites' }] : []),
+  ];
   const [favs, setFavs] = useState([]);
 
-  useEffect(() => { api.get('/api/favourites').then(r => setFavs(r.data.slice(0, 3))).catch(() => {}); }, []);
+  const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState(null);
+
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState(null);
+
+  useEffect(() => {
+    if (isCommuter) api.get('/api/favourites').then(r => setFavs(r.data.slice(0, 3))).catch(() => {});
+  }, [isCommuter]);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    setProfileMsg(null);
+    setProfileSaving(true);
+    try {
+      const { data } = await updateMe(profileForm);
+      updateUser({ name: data.name, email: data.email });
+      setProfileMsg({ type: 'success', text: 'Profile updated.' });
+    } catch (err) {
+      setProfileMsg({ type: 'error', text: err.response?.data?.message || 'Failed to update profile.' });
+    } finally { setProfileSaving(false); }
+  };
+
+  const savePassword = async (e) => {
+    e.preventDefault();
+    setPwMsg(null);
+    if (pwForm.newPassword.length < 8) { setPwMsg({ type: 'error', text: 'New password must be at least 8 characters.' }); return; }
+    if (pwForm.newPassword !== pwForm.confirm) { setPwMsg({ type: 'error', text: 'New passwords do not match.' }); return; }
+    setPwSaving(true);
+    try {
+      await changePassword({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
+      setPwForm({ currentPassword: '', newPassword: '', confirm: '' });
+      setPwMsg({ type: 'success', text: 'Password updated.' });
+    } catch (err) {
+      setPwMsg({ type: 'error', text: err.response?.data?.message || 'Failed to update password.' });
+    } finally { setPwSaving(false); }
+  };
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
@@ -41,28 +91,73 @@ export default function Profile() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', marginBottom: '0.25rem' }}>My Account</h1>
-          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Manage your profile and your favourite routes.</p>
+          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Manage your profile{isCommuter ? ' and your favourite routes' : ''}.</p>
 
           {/* Profile Info */}
           <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '1.75rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827' }}>Profile Information</h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
-              {[
-                { label: 'Full Name', value: user?.name },
-                { label: 'Email', value: user?.email },
-                { label: 'Role', value: user?.role },
-              ].map(f => (
-                <div key={f.label}>
-                  <div style={{ fontSize: '.78rem', color: '#9ca3af', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.05em' }}>{f.label}</div>
-                  <div style={{ fontWeight: 600, color: '#111827', fontSize: '.95rem' }}>{f.value}</div>
+            <form onSubmit={saveProfile}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={label}>Full Name</label>
+                  <input style={inp} type="text" value={profileForm.name}
+                    onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} required />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <label style={label}>Email</label>
+                  <input style={inp} type="email" value={profileForm.email}
+                    onChange={e => setProfileForm({ ...profileForm, email: e.target.value })} required />
+                </div>
+                <div>
+                  <div style={{ fontSize: '.78rem', color: '#9ca3af', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.05em' }}>Role</div>
+                  <div style={{ fontWeight: 600, color: '#111827', fontSize: '.95rem' }}>{user?.role}</div>
+                </div>
+              </div>
+              {profileMsg && (
+                <p style={{ fontSize: '.85rem', marginBottom: '1rem', color: profileMsg.type === 'error' ? '#dc2626' : '#16a34a' }}>{profileMsg.text}</p>
+              )}
+              <button type="submit" disabled={profileSaving}
+                style={{ padding: '0.6rem 1.4rem', background: '#1a5a7a', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '.875rem', cursor: 'pointer' }}>
+                {profileSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+
+          {/* Change Password */}
+          <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '1.75rem', marginBottom: '1.25rem' }}>
+            <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', marginBottom: '1.25rem' }}>Change Password</h2>
+            <form onSubmit={savePassword}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={label}>Current Password</label>
+                  <input style={inp} type="password" value={pwForm.currentPassword}
+                    onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })} required />
+                </div>
+                <div>
+                  <label style={label}>New Password</label>
+                  <input style={inp} type="password" value={pwForm.newPassword} minLength={8}
+                    onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })} required />
+                </div>
+                <div>
+                  <label style={label}>Confirm New Password</label>
+                  <input style={inp} type="password" value={pwForm.confirm}
+                    onChange={e => setPwForm({ ...pwForm, confirm: e.target.value })} required />
+                </div>
+              </div>
+              {pwMsg && (
+                <p style={{ fontSize: '.85rem', marginBottom: '1rem', color: pwMsg.type === 'error' ? '#dc2626' : '#16a34a' }}>{pwMsg.text}</p>
+              )}
+              <button type="submit" disabled={pwSaving}
+                style={{ padding: '0.6rem 1.4rem', background: '#1a5a7a', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '.875rem', cursor: 'pointer' }}>
+                {pwSaving ? 'Updating...' : 'Update Password'}
+              </button>
+            </form>
           </div>
 
           {/* Favourite Routes */}
+          {isCommuter && (
           <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '1.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div>
@@ -87,6 +182,7 @@ export default function Profile() {
               </Link>
             ))}
           </div>
+          )}
         </div>
       </div>
     </div>

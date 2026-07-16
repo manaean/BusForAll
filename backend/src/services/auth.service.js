@@ -33,6 +33,30 @@ const AuthService = {
     const user = await User.findByPk(id, { attributes: { exclude: ['passwordHash'] } });
     if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
     return user;
+  },
+
+  updateMe: async (id, { name, email }) => {
+    const user = await User.findByPk(id);
+    if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+    if (email !== undefined && email !== user.email) {
+      const existing = await User.findOne({ where: { email } });
+      if (existing) throw Object.assign(new Error('Email already in use'), { status: 409 });
+    }
+    const changes = {};
+    if (name !== undefined) changes.name = name;
+    if (email !== undefined) changes.email = email;
+    await user.update(changes);
+    return { id: user.id, name: user.name, email: user.email, role: user.role };
+  },
+
+  changePassword: async (id, currentPassword, newPassword) => {
+    const user = await User.findByPk(id);
+    if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw Object.assign(new Error('Current password is incorrect'), { status: 401 });
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.update({ passwordHash });
+    return { message: 'Password updated successfully' };
   }
 };
 

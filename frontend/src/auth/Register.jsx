@@ -5,7 +5,7 @@ import { register as registerApi, login as loginApi } from '../api/auth.api';
 
 const bg = {
   minHeight: '100vh',
-  background: 'linear-gradient(160deg, #dce8f0 0%, #c8d9e8 50%, #b8cdd9 100%)',
+  background: '#f8fafc',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -25,7 +25,7 @@ const inp = {
 };
 
 export default function Register() {
-  const [form, setForm] = useState({ email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
@@ -40,8 +40,7 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      const name = form.email.split('@')[0];
-      await registerApi({ name, email: form.email, password: form.password });
+      await registerApi({ name: form.name, email: form.email, password: form.password });
       const { data } = await loginApi({ email: form.email, password: form.password });
       login(data.user, data.token);
       navigate('/');
@@ -75,6 +74,20 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ fontSize: '.85rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
+              Full Name
+            </label>
+            <input
+              style={inp}
+              type="text"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              required
+              placeholder="Sophea Chan"
+            />
+          </div>
+
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ fontSize: '.85rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
               Email Address

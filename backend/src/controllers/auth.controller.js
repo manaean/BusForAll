@@ -28,6 +28,25 @@ const AuthController = {
       const user = await AuthService.getMe(req.user.id);
       res.json(user);
     } catch (err) { next(err); }
+  },
+
+  updateMe: async (req, res, next) => {
+    try {
+      const { name, email } = req.body;
+      const user = await AuthService.updateMe(req.user.id, { name, email });
+      res.json(user);
+    } catch (err) { next(err); }
+  },
+
+  changePassword: async (req, res, next) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'currentPassword and newPassword are required' });
+      }
+      const result = await AuthService.changePassword(req.user.id, currentPassword, newPassword);
+      res.json(result);
+    } catch (err) { next(err); }
   }
 };
 

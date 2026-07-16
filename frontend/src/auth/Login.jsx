@@ -5,7 +5,7 @@ import { login as loginApi } from '../api/auth.api';
 
 const bg = {
   minHeight: '100vh',
-  background: 'linear-gradient(160deg, #dce8f0 0%, #c8d9e8 50%, #b8cdd9 100%)',
+  background: '#f8fafc',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

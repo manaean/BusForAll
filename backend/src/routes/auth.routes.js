@@ -62,4 +62,47 @@ router.post('/login', AuthController.login);
  */
 router.get('/me', authenticateToken, AuthController.getMe);
 
+/**
+ * @swagger
+ * /api/auth/me:
+ *   put:
+ *     summary: Update the current authenticated user's profile
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string }
+ *     responses:
+ *       200: { description: Updated user }
+ *       409: { description: Email already in use }
+ */
+router.put('/me', authenticateToken, AuthController.updateMe);
+
+/**
+ * @swagger
+ * /api/auth/me/password:
+ *   put:
+ *     summary: Change the current authenticated user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       200: { description: Password updated }
+ *       401: { description: Current password is incorrect }
+ */
+router.put('/me/password', authenticateToken, AuthController.changePassword);
+
 module.exports = router;
