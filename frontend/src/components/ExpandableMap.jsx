@@ -39,7 +39,7 @@ export default function ExpandableMap({ height = 300, borderRadius = 0, mapProps
         onClick={() => setExpanded(v => !v)}
         title={expanded ? 'Exit full screen' : 'View full screen'}
         style={{
-          position: 'absolute', top: 10, right: 10, zIndex: 1000,
+          position: 'absolute', bottom: 10, left: 10, zIndex: 1000,
           width: 34, height: 34, borderRadius: 8, border: '1px solid #e5e7eb',
           background: '#fff', color: '#374151', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',

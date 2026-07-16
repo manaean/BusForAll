@@ -22,10 +22,28 @@ function FitBounds({ positions }) {
   return null;
 }
 
+function timeToMinutes(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+
+// Picks the schedule trip actually relevant right now: the most recent
+// departure at or before the current real time, so "Today's Schedule"
+// reflects the bus that's really running, not always the first trip of the day.
+function pickCurrentSchedule(schedules) {
+  if (!schedules.length) return null;
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  let current = schedules[0];
+  for (const s of schedules) {
+    if (timeToMinutes(s.departureTime) <= nowMin) current = s;
+    else break;
+  }
+  return current;
+}
+
 function computeStopTimes(stops, departureTime) {
   if (!departureTime || !stops.length) return [];
-  const [h, m] = departureTime.split(':').map(Number);
-  const base = h * 60 + m;
+  const base = timeToMinutes(departureTime);
   let cumMin = 0;
   return stops.map((s, i) => {
     if (i > 0) cumMin += rideMinutesForDistance(routeDistanceMeters([stops[i - 1], s]));
@@ -36,9 +54,17 @@ function computeStopTimes(stops, departureTime) {
   });
 }
 
-function stopStatus(i, busStopIdx) {
-  if (i <= busStopIdx) return 'Passed';
-  if (i === busStopIdx + 1) return 'Next';
+// Index of the next stop (first one at or after the real current time), so
+// Passed/Next/Upcoming matches the times actually shown next to each stop.
+// -1 means every stop on this trip has already passed.
+function findNextStopIdx(stopTimes, nowMin) {
+  return stopTimes.findIndex(({ time }) => timeToMinutes(time) >= nowMin);
+}
+
+function stopStatus(i, nextIdx) {
+  if (nextIdx === -1) return 'Passed';
+  if (i < nextIdx) return 'Passed';
+  if (i === nextIdx) return 'Next';
   return 'Upcoming';
 }
 
@@ -180,8 +206,9 @@ export default function TripDetail() {
   const routeTo = primaryStops[primaryStops.length - 1]?.name || destStop?.name || '';
 
   // Schedule
-  const primarySchedule = schedules[0];
+  const primarySchedule = pickCurrentSchedule(schedules) || schedules[0];
   const stopTimes = computeStopTimes(primaryStops, primarySchedule?.departureTime);
+  const nextStopIdx = findNextStopIdx(stopTimes, new Date().getHours() * 60 + new Date().getMinutes());
 
   const card = (children, extraStyle = {}) => (
     <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', overflow: 'hidden', marginBottom: '0.75rem', ...extraStyle }}>
@@ -252,13 +279,13 @@ export default function TripDetail() {
             <Polyline positions={highlightLine} color="#1a5a7a" weight={4} opacity={0.8} />
             {boardStop && (
               <CircleMarker center={[parseFloat(boardStop.latitude), parseFloat(boardStop.longitude)]}
-                radius={9} fillColor="#16a34a" color="#fff" weight={2.5} fillOpacity={1}>
+                radius={9} fillColor="#dc2626" color="#fff" weight={2.5} fillOpacity={1}>
                 <Popup><strong>Board here</strong><br />{boardStop.name}</Popup>
               </CircleMarker>
             )}
             {destStop && (
               <CircleMarker center={[parseFloat(destStop.latitude), parseFloat(destStop.longitude)]}
-                radius={9} fillColor="#dc2626" color="#fff" weight={2.5} fillOpacity={1}>
+                radius={9} fillColor="#16a34a" color="#fff" weight={2.5} fillOpacity={1}>
                 <Popup><strong>Destination</strong><br />{destStop.name}</Popup>
               </CircleMarker>
             )}
@@ -373,7 +400,7 @@ export default function TripDetail() {
               <span style={{ fontSize: '.72rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em' }}>Status</span>
             </div>
             {stopTimes.map(({ stop, time }, i) => {
-              const status = stopStatus(i, bus.stopIdx);
+              const status = stopStatus(i, nextStopIdx);
               const isNext = status === 'Next';
               const isPassed = status === 'Passed';
               const isBoard = stop.id === boardStop?.id;

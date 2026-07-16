@@ -95,14 +95,14 @@ export default function BusTracker({ routeId }) {
             key={stop.id}
             center={[parseFloat(stop.latitude), parseFloat(stop.longitude)]}
             radius={idx === 0 || idx === stops.length - 1 ? 9 : 6}
-            fillColor={idx === 0 ? '#16a34a' : idx === stops.length - 1 ? '#dc2626' : '#fff'}
+            fillColor={idx === 0 ? '#dc2626' : idx === stops.length - 1 ? '#16a34a' : '#fff'}
             color="#1a5a7a"
             weight={2}
             fillOpacity={1}>
             <Popup>
               <strong>{stop.name}</strong>
-              {idx === 0 && <div style={{ color: '#16a34a', fontSize: '.8rem' }}>First Stop</div>}
-              {idx === stops.length - 1 && <div style={{ color: '#dc2626', fontSize: '.8rem' }}>Last Stop</div>}
+              {idx === 0 && <div style={{ color: '#dc2626', fontSize: '.8rem' }}>First Stop</div>}
+              {idx === stops.length - 1 && <div style={{ color: '#16a34a', fontSize: '.8rem' }}>Last Stop</div>}
             </Popup>
           </CircleMarker>
         ))}
