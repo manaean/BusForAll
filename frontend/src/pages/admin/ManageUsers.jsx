@@ -8,12 +8,19 @@ const td = { padding: '9px 12px', borderBottom: '1px solid #f0f0f0', fontSize: '
 const btn = { padding: '0.4rem 0.85rem', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '.83rem', fontWeight: 600 };
 
 const ROLES = ['commuter', 'admin', 'driver'];
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'commuter', label: 'Users' },
+  { key: 'driver', label: 'Drivers' },
+  { key: 'admin', label: 'Admins' },
+];
 
 export default function ManageUsers() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
 
   const load = () => api.get('/api/users').then(r => setUsers(r.data));
   useEffect(() => { load(); }, []);
@@ -36,9 +43,11 @@ export default function ManageUsers() {
     catch (err) { setError(err.response?.data?.message || 'Error deleting user'); }
   };
 
-  const filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = users
+    .filter(u => roleFilter === 'all' || u.role === roleFilter)
+    .filter(u =>
+      u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
+    );
 
   const roleBadge = (r) => {
     const map = { admin: ['#e3f2fd', '#1565C0'], driver: ['#e8f5e9', '#2e7d32'], commuter: ['#f5f5f5', '#555'] };
@@ -53,6 +62,21 @@ export default function ManageUsers() {
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Manage Users</h1>
         {error && <p style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '.875rem' }}>{error}</p>}
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+          {FILTERS.map(f => (
+            <button key={f.key} type="button" onClick={() => setRoleFilter(f.key)}
+              style={{
+                padding: '0.4rem 0.9rem', borderRadius: 999, cursor: 'pointer', fontSize: '.83rem', fontWeight: 600,
+                border: roleFilter === f.key ? '1px solid #1a5a7a' : '1px solid var(--border)',
+                background: roleFilter === f.key ? '#1a5a7a' : '#fff',
+                color: roleFilter === f.key ? '#fff' : '#374151',
+              }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+
         <input placeholder="Search by name or email" value={search} onChange={e => setSearch(e.target.value)}
           style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: 6, marginBottom: '0.75rem', fontSize: '.9rem' }} />
         <div className="table-scroll" style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10 }}>
