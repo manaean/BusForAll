@@ -6,12 +6,14 @@ import { getAllRoutes } from '../api/route.api';
 import { getAlerts } from '../api/alert.api';
 import { getAllDelays } from '../api/driver.api';
 import NearbyStops from '../components/NearbyStops';
+import api from '../api/axios';
 
 export default function Landing() {
   const [query, setQuery] = useState('');
   const [routes, setRoutes] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [delays, setDelays] = useState([]);
+  const [favourites, setFavourites] = useState([]);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -19,7 +21,21 @@ export default function Landing() {
     getAllRoutes().then(r => setRoutes(r.data)).catch(() => {});
     getAlerts(true).then(r => setAlerts(r.data.slice(0, 3))).catch(() => {});
     getAllDelays().then(r => setDelays(r.data.filter(d => d.isActive))).catch(() => {});
-  }, []);
+    if (user) api.get('/api/favourites').then(r => setFavourites(r.data.map(f => f.routeId))).catch(() => {});
+  }, [user]);
+
+  const toggleFav = async (e, routeId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) { navigate('/login'); return; }
+    if (favourites.includes(routeId)) {
+      await api.delete(`/api/favourites/${routeId}`);
+      setFavourites(f => f.filter(id => id !== routeId));
+    } else {
+      await api.post(`/api/favourites/${routeId}`);
+      setFavourites(f => [...f, routeId]);
+    }
+  };
 
   const getRouteStatus = (routeId) => delays.find(d => d.routeId === routeId);
 
@@ -110,13 +126,17 @@ export default function Landing() {
             {routes.length === 0 ? (
               <p style={{ color: '#9ca3af', fontSize: '.875rem', gridColumn: 'span 2' }}>No routes available.</p>
             ) : routes.slice(0, 4).map(r => (
-              <Link key={r.id} className="route-card" to={`/schedule/${r.id}`} style={{ textDecoration: 'none', padding: '0.9rem 1rem', display: 'block' }}>
+              <Link key={r.id} className="route-card" to={`/schedule/${r.id}`} style={{ textDecoration: 'none', padding: '0.9rem 1rem', display: 'block', position: 'relative' }}>
+                <button onClick={(e) => toggleFav(e, r.id)} title={favourites.includes(r.id) ? 'Remove favourite' : 'Save route'}
+                  style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: favourites.includes(r.id) ? '#f59e0b' : '#d1d5db', padding: 0, lineHeight: 1 }}>
+                  {favourites.includes(r.id) ? '★' : '☆'}
+                </button>
                 <div style={{ marginBottom: '0.4rem' }}>
                   <span style={{ background: '#1a5a7a', color: '#fff', fontSize: '.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>Route {r.id}</span>
                 </div>
-                <div style={{ fontWeight: 600, fontSize: '.88rem', color: '#111827', marginBottom: '0.35rem' }}>{getRouteLabel(r)}</div>
+                <div style={{ fontWeight: 600, fontSize: '.88rem', color: '#111827', marginBottom: '0.35rem', paddingRight: '1.4rem' }}>{getRouteLabel(r)}</div>
                 {(() => { const d = getRouteStatus(r.id); return d
-                  ? <span className="status-badge status-badge-warning">+{d.delayMinutes} min delay</span>
+                  ? <span className="status-badge status-badge-danger">+{d.delayMinutes} min delay</span>
                   : <span className="status-badge status-badge-success">On Time</span>;
                 })()}
               </Link>

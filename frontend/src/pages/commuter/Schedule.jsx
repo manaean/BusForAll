@@ -52,7 +52,7 @@ export default function Schedule() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '1.5rem' }}>
 
         {/* Back */}
-        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>← Back</button>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>← Back</button>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.25rem 0 1.5rem', flexWrap: 'wrap' }}>
@@ -74,7 +74,7 @@ export default function Schedule() {
               {isFav ? '★ Saved' : '☆ Add to Favourites'}
             </button>
             <Link to={`/tracker/${routeId}`}
-              style={{ padding: '8px 18px', background: 'var(--primary)', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '.875rem' }}>
+              style={{ padding: '8px 18px', background: hasDelay ? '#dc2626' : 'var(--primary)', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '.875rem' }}>
               Track Live
             </Link>
           </div>
@@ -85,7 +85,7 @@ export default function Schedule() {
           <div className="stats-grid">
             {[
               { label: 'First Bus', value: schedules[0]?.departureTime },
-              { label: 'Last Bus', value: schedules[schedules.length - 1]?.arrivalTime },
+              { label: 'Last Bus', value: schedules[schedules.length - 1]?.departureTime },
               { label: 'Days', value: 'Monday - Sunday' },
             ].map(c => (
               <div key={c.label} style={{ background: '#fff', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid #e5e7eb' }}>
@@ -143,18 +143,17 @@ export default function Schedule() {
             </div>
 
             {/* Weekly Schedule */}
-            <div style={{ background: '#fff', borderRadius: 14, padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+            {schedules.length > 0 && (
+              <div style={{ background: '#fff', borderRadius: 14, padding: '1.5rem', border: '1px solid #e5e7eb' }}>
                 <h2 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1rem', color: '#111827' }}>Weekly Schedule</h2>
-                {[
-                  { days: 'Monday - Friday', time: '6:00 - 19:00' },
-                  { days: 'Saturday - Sunday', time: '7:00 - 18:00' },
-                ].map(s => (
-                  <div key={s.days} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '.85rem' }}>
-                    <span style={{ color: '#6b7280', fontWeight: 500 }}>{s.days}</span>
-                    <span style={{ fontWeight: 600, color: '#111827' }}>{s.time}</span>
-                  </div>
-                ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', fontSize: '.85rem' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500 }}>Monday - Sunday</span>
+                  <span style={{ fontWeight: 600, color: '#111827' }}>
+                    {schedules[0]?.departureTime?.slice(0, 5)} - {schedules[schedules.length - 1]?.departureTime?.slice(0, 5)}
+                  </span>
+                </div>
               </div>
+            )}
           </div>
         </div>
       </div>

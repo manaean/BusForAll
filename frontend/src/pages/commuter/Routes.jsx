@@ -339,6 +339,7 @@ export default function Routes() {
                 const isFav = favourites.includes(r.id);
                 const stops = sortedStops(r).filter(s => s.latitude && s.longitude);
                 const distanceKm = stops.length > 1 ? routeDistanceMeters(stops) / 1000 : null;
+                const routeDelayed = delayByRoute.has(r.id);
                 return (
                   <div key={r.id} className="route-list-card"
                     onClick={() => navigate(`/schedule/${r.id}`)}
@@ -354,9 +355,9 @@ export default function Routes() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                      <Link to={`/tracker/${r.id}`} className="track-bus-button" onClick={e => e.stopPropagation()}
-                        style={{ padding: '6px 14px', background: '#eff6ff', color: 'var(--primary)', borderRadius: 20, fontSize: '.8rem', fontWeight: 600, textDecoration: 'none' }}>
-                        🟢 Live Tracking
+                      <Link to={`/tracker/${r.id}`} className={`track-bus-button${routeDelayed ? ' delayed' : ''}`} onClick={e => e.stopPropagation()}
+                        style={{ padding: '6px 14px', background: routeDelayed ? '#fef2f2' : '#eff6ff', color: routeDelayed ? '#dc2626' : 'var(--primary)', borderRadius: 20, fontSize: '.8rem', fontWeight: 600, textDecoration: 'none' }}>
+                        Live Tracking
                       </Link>
                       <button onClick={e => toggleFav(e, r.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.3rem', color: isFav ? '#f59e0b' : '#d1d5db', padding: '0 4px' }}

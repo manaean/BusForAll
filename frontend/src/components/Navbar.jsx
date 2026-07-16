@@ -1,13 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+const ROUTE_PREFIXES = ['/routes', '/schedule', '/trip', '/tracker'];
 
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropOpen, setDropOpen] = useState(false);
 
   const handleLogout = () => { logout(); setDropOpen(false); navigate('/'); };
+
+  const startsWithAny = (prefixes) => prefixes.some(p => location.pathname === p || location.pathname.startsWith(p + '/'));
+  const isRoutesActive = startsWithAny(ROUTE_PREFIXES);
+  const isFavouritesActive = startsWithAny(['/favourites']);
+  const isAlertsActive = startsWithAny(['/alerts']);
 
   const linkStyle = { color: '#374151', textDecoration: 'none', fontSize: '.9rem', fontWeight: 500 };
 
@@ -17,27 +25,29 @@ export default function Navbar({ onMenuClick }) {
       {/* Left: Menu button (if provided) + Brand + links */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         {onMenuClick && (
-          <button onClick={onMenuClick} style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.4rem 0.7rem', cursor: 'pointer', fontSize: '1.1rem', color: '#374151', lineHeight: 1, flexShrink: 0 }}>
+          <button onClick={onMenuClick} className="navbar-menu-btn" style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.4rem 0.7rem', cursor: 'pointer', fontSize: '1.1rem', color: '#374151', lineHeight: 1, flexShrink: 0 }}>
             &#9776;
           </button>
         )}
         <Link to="/" style={{ fontWeight: 800, fontSize: '1.15rem', color: '#1a3a52', textDecoration: 'none' }}>Bus For All</Link>
-        <div className="nav-links" style={{ display: 'flex', gap: '1.5rem' }}>
-          <Link to="/routes" className="nav-link" style={linkStyle}>Routes</Link>
-          {user && <Link to="/favourites" className="nav-link" style={linkStyle}>Favourites</Link>}
-          <Link to="/alerts" className="nav-link" style={linkStyle}>Alerts</Link>
-        </div>
+        {user?.role !== 'admin' && user?.role !== 'driver' && (
+          <div className="nav-links" style={{ display: 'flex', gap: '1.5rem' }}>
+            <Link to="/routes" className={`nav-link${isRoutesActive ? ' active' : ''}`} style={linkStyle}>Routes</Link>
+            <Link to="/favourites" className={`nav-link${isFavouritesActive ? ' active' : ''}`} style={linkStyle}>Favourites</Link>
+            <Link to="/alerts" className={`nav-link${isAlertsActive ? ' active' : ''}`} style={linkStyle}>Alerts</Link>
+          </div>
+        )}
       </div>
 
       {/* Right: Login or Settings */}
       <div style={{ position: 'relative' }}>
         {!user ? (
-          <Link to="/login" style={{ padding: '0.45rem 1.25rem', background: '#1a5a7a', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '.9rem' }}>
+          <Link to="/login" className="navbar-login-btn" style={{ padding: '0.45rem 1.25rem', background: '#1a5a7a', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '.9rem', display: 'inline-block' }}>
             Login
           </Link>
         ) : (
           <>
-            <button onClick={() => setDropOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.4rem 0.9rem', cursor: 'pointer', fontSize: '.9rem', fontWeight: 600, color: '#1a3a52' }}>
+            <button onClick={() => setDropOpen(o => !o)} className="navbar-settings-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.4rem 0.9rem', cursor: 'pointer', fontSize: '.9rem', fontWeight: 600, color: '#1a3a52' }}>
               <div style={{ width: 26, height: 26, background: '#1a5a7a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '.78rem', flexShrink: 0 }}>
                 {user.name?.[0]?.toUpperCase()}
               </div>

@@ -51,6 +51,17 @@
   background: #dbeef7;
   transform: translateY(-1px);
 }
+.nav-link.active {
+  color: #fff !important;
+  background: #1a5a7a;
+  font-weight: 700;
+}
+.nav-link.active:hover,
+.nav-link.active:focus-visible {
+  background: #144863;
+  color: #fff !important;
+  transform: none;
+}
 
 /* Back links */
 .back-link {
@@ -83,6 +94,12 @@
   background: #1565c0 !important;
   color: #fff !important;
 }
+.route-list-card:hover .track-bus-button.delayed,
+.track-bus-button.delayed:hover,
+.track-bus-button.delayed:focus-visible {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
 
 /* Schedule: content + sidebar */
 .schedule-layout {
@@ -110,6 +127,39 @@
   display: flex;
   gap: 0.25rem;
   flex: 1;
+}
+
+/* Navbar buttons: menu toggle, login, settings dropdown */
+.navbar-menu-btn,
+.navbar-login-btn,
+.navbar-settings-btn {
+  transition: background-color 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.navbar-menu-btn:hover,
+.navbar-menu-btn:focus-visible {
+  background: #eef1f4 !important;
+  border-color: #c7ccd3 !important;
+}
+.navbar-menu-btn:active {
+  background: #e2e6ea !important;
+  transform: scale(0.96);
+}
+.navbar-login-btn:hover,
+.navbar-login-btn:focus-visible {
+  background: #144863 !important;
+}
+.navbar-login-btn:active {
+  background: #0f394f !important;
+  transform: scale(0.97);
+}
+.navbar-settings-btn:hover,
+.navbar-settings-btn:focus-visible {
+  background: #f3f4f6 !important;
+  border-color: #cbd2d9 !important;
+}
+.navbar-settings-btn:active {
+  background: #e5e7eb !important;
+  transform: scale(0.97);
 }
 
 /* Hero action buttons */
@@ -306,6 +356,7 @@
 }
 .status-badge-success { background: #dcfce7; color: #15803d; }
 .status-badge-warning { background: #fef3c7; color: #b45309; }
+.status-badge-danger { background: #fef2f2; color: #dc2626; }
 
 .landing-grid {
   display: grid;
