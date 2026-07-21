@@ -1,10 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getRouteById } from '../../api/route.api';
 import { getSchedulesByRoute } from '../../api/schedule.api';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { routeDistanceMeters } from '../../utils/tripPlanner';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 const COLORS = ['#1565C0', '#2E7D32', '#E65100', '#6A1B9A', '#00838F', '#AD1457'];
 
@@ -17,7 +18,7 @@ export default function Schedule() {
   const [isFav, setIsFav] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  useAutoRefresh(() => {
     Promise.all([getRouteById(routeId), getSchedulesByRoute(routeId)]).then(([r, s]) => {
       setRoute(r.data); setSchedules(s.data); setLoading(false);
     });

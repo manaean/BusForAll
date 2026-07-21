@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { getRouteById } from '../api/route.api';
 import ExpandableMap from './ExpandableMap';
 import useSimulatedBus from '../hooks/useSimulatedBus';
+import useAutoRefresh from '../hooks/useAutoRefresh';
 
 function FitBounds({ positions }) {
   const map = useMap();
@@ -31,7 +32,7 @@ export default function BusTracker({ routeId }) {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  useEffect(() => {
+  useAutoRefresh(() => {
     getRouteById(routeId)
       .then(r => {
         const sorted = [...(r.data.Stops || [])]

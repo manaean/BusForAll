@@ -56,6 +56,13 @@ const RouteController = {
       const result = await RouteService.removeStop(req.params.id, req.params.stopId);
       res.json(result);
     } catch (err) { next(err); }
+  },
+
+  reorderStops: async (req, res, next) => {
+    try {
+      const stops = await RouteService.reorderStops(req.params.id, req.body.stopIds);
+      res.json(stops);
+    } catch (err) { next(err); }
   }
 };
 

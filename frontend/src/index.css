@@ -1,5 +1,23 @@
 /* ── Responsive utility classes ─────────────────────────────── */
 
+/* Hide the up/down spinner arrows on number inputs */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Hide the native dropdown arrow on select elements */
+.no-arrow {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 /* Auth pages: Login / Register two-column layout */
 .auth-layout {
   display: flex;

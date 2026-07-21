@@ -1,31 +1,42 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
+import { getAllRoutes, getRouteStops, addStopToRoute } from '../../api/route.api';
 
 const page = { maxWidth: 900, margin: '0 auto', padding: '1.5rem 1rem' };
 const th = { padding: '9px 12px', textAlign: 'left', fontSize: '.82rem', color: 'var(--text-light)', fontWeight: 600, borderBottom: '1px solid var(--border)' };
 const td = { padding: '9px 12px', borderBottom: '1px solid #f0f0f0', fontSize: '.9rem' };
 const btn = { padding: '0.4rem 0.85rem', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '.83rem', fontWeight: 600 };
+const inputStyle = { width: '100%', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: 6, marginBottom: '0.5rem', fontSize: '.9rem' };
 
-const emptyForm = { name: '', latitude: '', longitude: '' };
+const emptyForm = { name: '', latitude: '', longitude: '', routeId: '' };
 
 export default function ManageStops() {
   const navigate = useNavigate();
   const [stops, setStops] = useState([]);
+  const [routes, setRoutes] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
 
   const load = () => api.get('/api/stops').then(r => setStops(r.data));
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); getAllRoutes().then(r => setRoutes(r.data)); }, []);
 
   const submit = async (e) => {
     e.preventDefault(); setError('');
     try {
       const payload = { name: form.name, latitude: parseFloat(form.latitude), longitude: parseFloat(form.longitude) };
+      let stopId = editing;
       if (editing) { await api.put(`/api/stops/${editing}`, payload); }
-      else { await api.post('/api/stops', payload); }
+      else { const r = await api.post('/api/stops', payload); stopId = r.data.id; }
+
+      if (form.routeId) {
+        const existing = await getRouteStops(form.routeId);
+        const nextOrder = existing.data.reduce((max, s) => Math.max(max, s.RouteStop.stopOrder), 0) + 1;
+        await addStopToRoute(form.routeId, { stopId, stopOrder: nextOrder });
+      }
+
       setForm(emptyForm); setEditing(null); setShowForm(false); load();
     } catch (err) { setError(err.response?.data?.message || 'Error saving stop'); }
   };
@@ -35,11 +46,11 @@ export default function ManageStops() {
     await api.delete(`/api/stops/${id}`); load();
   };
 
-  const startEdit = (s) => { setForm({ name: s.name, latitude: s.latitude, longitude: s.longitude }); setEditing(s.id); setShowForm(true); };
+  const startEdit = (s) => { setForm({ name: s.name, latitude: s.latitude, longitude: s.longitude, routeId: '' }); setEditing(s.id); setShowForm(true); };
 
   return (
     <>
-      
+
       <div style={page}>
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '.875rem', fontWeight: 500, padding: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>&#8592; Back</button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -55,9 +66,17 @@ export default function ManageStops() {
             {error && <p style={{ color: 'var(--danger)', marginBottom: '0.5rem', fontSize: '.875rem' }}>{error}</p>}
             {[['name', 'Stop name', 'text'], ['latitude', 'Latitude', 'number'], ['longitude', 'Longitude', 'number']].map(([k, ph, t]) => (
               <input key={k} required type={t} placeholder={ph} value={form[k]} step="any"
+                className={t === 'number' ? 'no-spinner' : undefined}
                 onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))}
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: 6, marginBottom: '0.5rem', fontSize: '.9rem' }} />
+                style={inputStyle} />
             ))}
+
+            <select required className="no-arrow" value={form.routeId} onChange={e => setForm(f => ({ ...f, routeId: e.target.value }))}
+              style={{ ...inputStyle, fontFamily: 'inherit', fontWeight: 400, color: form.routeId ? 'inherit' : '#9ca3af' }}>
+              <option value="">Assign to route</option>
+              {routes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+
             <button type="submit" style={{ ...btn, background: 'var(--primary)', color: '#fff', marginTop: 4 }}>{editing ? 'Save Changes' : 'Create Stop'}</button>
           </form>
         )}

@@ -40,9 +40,9 @@ export default function Login() {
     try {
       const { data } = await loginApi(form);
       login(data.user, data.token);
-      if (data.user.role === 'admin') navigate('/admin');
-      else if (data.user.role === 'driver') navigate('/driver');
-      else navigate('/');
+      if (data.user.role === 'admin') navigate('/admin', { replace: true });
+      else if (data.user.role === 'driver') navigate('/driver', { replace: true });
+      else navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally { setLoading(false); }

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAlerts } from '../../api/alert.api';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 const TYPE_STYLE = {
   delay:      { bg: '#fef2f2', border: '#fecaca', badge: '#dc2626', label: 'Delayed' },
@@ -14,7 +15,7 @@ export default function Alerts() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { getAlerts(false).then(r => { setAlerts(r.data); setLoading(false); }); }, []);
+  useAutoRefresh(() => { getAlerts(false).then(r => { setAlerts(r.data); setLoading(false); }); }, []);
 
   const active = alerts.filter(a => a.isActive);
   const resolved = alerts.filter(a => !a.isActive);

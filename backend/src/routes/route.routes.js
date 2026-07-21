@@ -58,5 +58,6 @@ router.put('/:id', ...adminOnly, RouteController.update);
 router.delete('/:id', ...adminOnly, RouteController.delete);
 router.post('/:id/stops', ...adminOnly, RouteController.addStop);
 router.delete('/:id/stops/:stopId', ...adminOnly, RouteController.removeStop);
+router.put('/:id/stops/order', ...adminOnly, RouteController.reorderStops);
 
 module.exports = router;

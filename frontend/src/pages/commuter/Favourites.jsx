@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import RouteCard from '../../components/RouteCard';
 import api from '../../api/axios';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 const page = { maxWidth: 700, margin: '0 auto', padding: '1.5rem 1rem' };
 
@@ -12,7 +13,7 @@ export default function Favourites() {
 
   const load = () => api.get('/api/favourites').then(r => { setFavs(r.data); setLoading(false); });
 
-  useEffect(() => { load(); }, []);
+  useAutoRefresh(load, []);
 
   const removeFav = async (routeId) => {
     await api.delete(`/api/favourites/${routeId}`);

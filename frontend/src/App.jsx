@@ -34,14 +34,12 @@ import ManageTracking from './pages/admin/ManageTracking';
 
 // Driver
 import DriverHome from './pages/driver/DriverHome';
-import DriverSchedule from './pages/driver/DriverSchedule';
-import DriverBus from './pages/driver/DriverBus';
 
 function RoleRedirect() {
   const { user } = useAuth();
   if (!user) return <Landing />;
-  if (user.role === 'admin') return <Navigate to="/admin" />;
-  if (user.role === 'driver') return <Navigate to="/driver" />;
+  if (user.role === 'admin') return <Navigate to="/admin" replace />;
+  if (user.role === 'driver') return <Navigate to="/driver" replace />;
   return <Landing />;
 }
 
@@ -86,12 +84,9 @@ export default function App() {
         {/* Driver routes */}
         <Route element={<ProtectedRoute roles={['driver']}><DriverLayout /></ProtectedRoute>}>
           <Route path="/driver" element={<DriverHome />} />
-          <Route path="/driver/schedule" element={<DriverSchedule />} />
-          <Route path="/driver/bus" element={<DriverBus />} />
-          <Route path="/driver/bus/:routeId" element={<DriverBus />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

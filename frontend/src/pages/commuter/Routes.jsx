@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import TripResultRow from '../../components/TripResultRow';
 import { planTrips, routeDistanceMeters } from '../../utils/tripPlanner';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 const COLORS = ['#1565C0', '#2E7D32', '#E65100', '#6A1B9A', '#00838F', '#AD1457'];
 
@@ -30,7 +31,7 @@ export default function Routes() {
   const [delays, setDelays] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useAutoRefresh(() => {
     getAllRoutes().then(r => { setRoutes(r.data); setLoading(false); });
     getAllDelays().then(r => setDelays(r.data.filter(d => d.isActive))).catch(() => {});
     if (user) api.get('/api/favourites').then(r => setFavourites(r.data.map(f => f.routeId))).catch(() => {});

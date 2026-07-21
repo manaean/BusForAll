@@ -306,7 +306,8 @@ async function seed() {
   await Schedule.bulkCreate(schedules);
 
   // Sample assignments for today
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   await Assignment.create({ driverId: driver1.id, busId: buses[0].id, routeId: ROUTES[0].id, assignmentDate: today });
   await Assignment.create({ driverId: driver2.id, busId: buses[5].id, routeId: ROUTES[1].id, assignmentDate: today });
 

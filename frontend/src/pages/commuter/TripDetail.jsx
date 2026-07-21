@@ -8,6 +8,7 @@ import { getAllDelays } from '../../api/driver.api';
 import TripItinerary from '../../components/TripItinerary';
 import ExpandableMap from '../../components/ExpandableMap';
 import useSimulatedBus, { etaMinutes } from '../../hooks/useSimulatedBus';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 import { haversine, routeDistanceMeters, rideMinutesForDistance } from '../../utils/tripPlanner';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
@@ -105,7 +106,7 @@ export default function TripDetail() {
   const [delayMinutes, setDelayMinutes] = useState(state?.delayMinutes || 0);
   const [isFav, setIsFav] = useState(false);
 
-  useEffect(() => {
+  useAutoRefresh(() => {
     getSchedulesByRoute(routeId).then(r => setSchedules(r.data)).catch(() => {});
     if (!state?.delayMinutes) {
       getAllDelays().then(r => {
@@ -116,7 +117,7 @@ export default function TripDetail() {
     if (user) {
       api.get('/api/favourites').then(r => setIsFav(r.data.some(f => f.routeId === parseInt(routeId)))).catch(() => {});
     }
-  }, [routeId, user]); // eslint-disable-line
+  }, [routeId, user]);
 
   const toggleFav = async () => {
     if (!user) { navigate('/login'); return; }

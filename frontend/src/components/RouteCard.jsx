@@ -23,7 +23,7 @@ export default function RouteCard({ route, onFavToggle, isFav, isGuest }) {
         {route.description && <div style={s.desc}>{route.description}</div>}
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button className="track-bus-button" style={s.trackBtn} onClick={() => navigate(`/tracker/${route.id}`)}>🟢 Live Tracking</button>
+        <button className="track-bus-button" style={s.trackBtn} onClick={() => navigate(`/tracker/${route.id}`)}>Live Tracking</button>
         <button style={s.favBtn} onClick={handleFav} title={isGuest ? 'Login to save' : isFav ? 'Remove favourite' : 'Add favourite'}>
           {isFav ? '★' : '☆'}
         </button>

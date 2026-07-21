@@ -10,7 +10,8 @@ const td = { padding: '9px 12px', borderBottom: '1px solid #f0f0f0', fontSize: '
 const btn = { padding: '0.4rem 0.85rem', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '.83rem', fontWeight: 600 };
 const searchInput = { width: '100%', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: 6, marginBottom: '0.5rem', fontSize: '.9rem', boxSizing: 'border-box' };
 
-const today = new Date().toISOString().split('T')[0];
+const now = new Date();
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 const emptyForm = { driverId: '', busId: '', routeId: '', assignmentDate: today };
 
 function SearchSelect({ query, onQueryChange, focused, onFocus, onBlur, placeholder, suggestions, onPick, renderOption }) {

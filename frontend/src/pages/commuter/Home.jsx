@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AlertBanner from '../../components/AlertBanner';
 import { useAuth } from '../../context/AuthContext';
 import { getAllRoutes } from '../../api/route.api';
 import { getAlerts } from '../../api/alert.api';
 import api from '../../api/axios';
+import useAutoRefresh from '../../hooks/useAutoRefresh';
 
 const page = { maxWidth: 700, margin: '0 auto', padding: '1.5rem 1rem' };
 const heading = { fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.25rem' };
@@ -19,7 +20,7 @@ export default function Home() {
   const [alerts, setAlerts] = useState([]);
   const [favourites, setFavourites] = useState([]);
 
-  useEffect(() => {
+  useAutoRefresh(() => {
     getAllRoutes()
       .then(r => setRoutes(r.data.slice(0, 3)))
       .catch(err => console.error('Routes error:', err));

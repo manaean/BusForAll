@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllRoutes, createRoute, updateRoute, deleteRoute, getRouteStops, addStopToRoute, removeStopFromRoute } from '../../api/route.api';
+import { getAllRoutes, createRoute, updateRoute, deleteRoute, getRouteStops, addStopToRoute } from '../../api/route.api';
 import api from '../../api/axios';
 
 const page = { maxWidth: 900, margin: '0 auto', padding: '1.5rem 1rem' };
@@ -48,12 +48,6 @@ export default function ManageRoutes() {
       setStopForm({ stopId: '', stopOrder: '' });
       await loadRouteStops(expanded);
     } catch (err) { setStopError(err.response?.data?.message || 'Error adding stop'); }
-  };
-
-  const removeStop = async (stopId) => {
-    if (!window.confirm('Remove this stop from the route?')) return;
-    await removeStopFromRoute(expanded, stopId);
-    await loadRouteStops(expanded);
   };
 
   const submit = async (e) => {
@@ -122,7 +116,6 @@ export default function ManageRoutes() {
                               {[...routeStops].sort((a, b) => a.RouteStop.stopOrder - b.RouteStop.stopOrder).map(s => (
                                 <li key={s.id} style={{ fontSize: '.85rem', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
                                   <span>{s.name} <span style={{ color: 'var(--text-light)' }}>(order {s.RouteStop.stopOrder})</span></span>
-                                  <button style={{ ...btn, padding: '0.15rem 0.5rem', background: '#ffe3e3', color: 'var(--danger)' }} onClick={() => removeStop(s.id)}>Remove</button>
                                 </li>
                               ))}
                             </ol>
@@ -136,7 +129,7 @@ export default function ManageRoutes() {
                             <input required type="number" min="1" placeholder="Order" value={stopForm.stopOrder}
                               onChange={e => setStopForm(f => ({ ...f, stopOrder: e.target.value }))}
                               style={{ width: 80, padding: '0.5rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.85rem' }} />
-                            <button type="submit" style={{ ...btn, background: 'var(--primary)', color: '#fff' }}>Add Stop</button>
+                            <button type="submit" style={{ ...btn, background: 'var(--primary)', color: '#fff' }}>Update</button>
                           </form>
                         </td>
                       </tr>

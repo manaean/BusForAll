@@ -6,4 +6,4 @@ export const createRoute = (data) => api.post('/api/routes', data);
 export const updateRoute = (id, data) => api.put(`/api/routes/${id}`, data);
 export const deleteRoute = (id) => api.delete(`/api/routes/${id}`);
 export const addStopToRoute = (routeId, data) => api.post(`/api/routes/${routeId}/stops`, data);
-export const removeStopFromRoute = (routeId, stopId) => api.delete(`/api/routes/${routeId}/stops/${stopId}`);
+export const reorderRouteStops = (routeId, stopIds) => api.put(`/api/routes/${routeId}/stops/order`, { stopIds });
